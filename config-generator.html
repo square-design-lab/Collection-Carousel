@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collection Carousel — Config Generator v1.0</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Real plugin stylesheet so the live preview matches production exactly -->
+    <link rel="stylesheet" href="carousel.css">
+
+    <style>
+        :root {
+            --bg-body: #F5F5F7;
+            --bg-sidebar: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border-light: #E5E5E5;
+            --border-hover: #D4D4D4;
+            --border-active: #18181B;
+            --accent: #18181B;
+            --accent-hover: #09090B;
+            --accent-contrast: #FFFFFF;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --sidebar-width: 380px;
+            --header-height: 60px;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+        .sidebar-header {
+            height: var(--header-height);
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-header h2 {
+            font-size: 15px; font-weight: 700; margin: 0;
+            display: flex; align-items: center; gap: 10px;
+            letter-spacing: -0.02em;
+        }
+        .brand-icon {
+            width: 30px; height: 30px;
+            background: var(--accent); color: #fff;
+            border-radius: 8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar-header .badge {
+            font-size: 10px; background: #F4F4F5;
+            padding: 2px 7px; border-radius: 4px;
+            color: #52525B; font-weight: 600;
+            border: 1px solid #D4D4D8;
+        }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 24px; }
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 3px; }
+        .sidebar-content::-webkit-scrollbar-thumb:hover { background: #D4D4D4; }
+
+        .group { margin-bottom: 18px; border-bottom: 1px solid var(--border-light); padding-bottom: 18px; }
+        .group:last-child { border-bottom: none; }
+        .group-header {
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: color 0.2s;
+        }
+        .group-header:hover { color: var(--text-main); }
+        .group-header::after {
+            content: ''; width: 6px; height: 6px;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 0.2s; margin-right: 4px;
+        }
+        .group.open .group-header::after { transform: rotate(-135deg); }
+        .group-body { display: none; padding-top: 14px; }
+        .group.open .group-body { display: block; animation: slideIn 0.2s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .control-row { margin-bottom: 14px; }
+        label {
+            display: block; font-size: 13px; font-weight: 500;
+            margin-bottom: 6px; color: var(--text-main);
+        }
+        .helper-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%; height: 36px; padding: 0 10px;
+            font-family: inherit; font-size: 13px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            background: #fff; color: var(--text-main);
+            transition: all 0.15s; appearance: none;
+        }
+        input:hover, select:hover { border-color: var(--border-hover); }
+        input:focus, select:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 8px center;
+            background-size: 14px; padding-right: 30px;
+        }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid2 label, .grid3 label { font-size: 12px; }
+
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; min-height: 24px;
+        }
+        .toggle-row label { margin: 0; font-weight: 400; color: var(--text-secondary); }
+
+        input[type="checkbox"] {
+            appearance: none; width: 36px; height: 20px;
+            background: #E5E5E5; border-radius: 20px;
+            position: relative; cursor: pointer; transition: 0.2s; border: none; flex-shrink: 0;
+        }
+        input[type="checkbox"]::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 16px; height: 16px; background: #fff; border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        input[type="checkbox"]:checked { background: var(--accent); }
+        input[type="checkbox"]:checked::after { transform: translateX(16px); }
+
+        .color-row {
+            display: flex; flex-direction: column; gap: 10px;
+            background: #FAFAFA; padding: 12px;
+            border-radius: var(--radius-md); border: 1px solid var(--border-light);
+        }
+        .color-chip { display: flex; align-items: center; justify-content: space-between; }
+        .color-chip .color-label { font-size: 12px; font-weight: 500; }
+        input[type="color"] {
+            width: 28px; height: 28px; padding: 0;
+            border: 1.5px solid #B8B8B8; border-radius: 50%;
+            overflow: hidden; cursor: pointer; background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; background: var(--bg-body); position: relative; }
+        .topbar {
+            height: var(--header-height); padding: 0 24px;
+            border-bottom: 1px solid var(--border-light); background: #fff;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .device-toggle { background: #F2F2F2; padding: 2px; border-radius: 6px; display: flex; }
+        .device-toggle button {
+            border: none; background: transparent; padding: 6px 12px;
+            font-size: 12px; font-weight: 500; color: var(--text-secondary);
+            cursor: pointer; border-radius: 4px; transition: 0.2s; font-family: inherit;
+        }
+        .device-toggle button.active { background: #fff; color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        .copy-btn {
+            background: var(--accent); color: var(--accent-contrast);
+            border: none; padding: 9px 20px; border-radius: 7px;
+            font-weight: 600; font-size: 13px; letter-spacing: -0.01em;
+            cursor: pointer; display: flex; align-items: center; gap: 7px;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18); font-family: inherit;
+        }
+        .copy-btn:hover { background: var(--accent-hover); }
+        .copy-btn:active { transform: scale(0.97); }
+        .copy-btn.copied { background: #0EA5E9; box-shadow: 0 1px 3px rgba(14,165,233,0.3); }
+
+        .preview-container {
+            flex: 1; overflow-y: auto; padding: 40px;
+            display: flex; justify-content: center; align-items: flex-start;
+            background-image: radial-gradient(#E1E1E1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        #previewFrame {
+            background: #fff; width: 100%; max-width: 1100px; min-height: 460px;
+            box-shadow: var(--shadow-lg); border-radius: var(--radius-lg);
+            padding: 40px;
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column; justify-content: center;
+            border: 1px solid var(--border-light);
+        }
+        #previewFrame.mobile { width: 390px; padding: 20px; border-radius: 30px; border: 8px solid #333; }
+        .effect-note {
+            margin-top: 18px; font-size: 11px; color: var(--text-tertiary);
+            text-align: center; font-style: italic;
+        }
+
+        .code-drawer {
+            height: 250px; background: #0D0D0D; color: #E1E1E1;
+            display: flex; flex-direction: column;
+            border-top: 1px solid var(--border-light);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .drawer-header {
+            padding: 10px 24px; background: #1A1A1A; border-bottom: 1px solid #333;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .drawer-header h3 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; }
+        #codeOutput { flex: 1; padding: 24px; margin: 0; overflow: auto; font-size: 12px; line-height: 1.6; color: #A9B7C6; white-space: pre-wrap; }
+        #codeOutput .hl-key  { color: #E5BF78; }
+        #codeOutput .hl-str  { color: #87C98F; }
+        #codeOutput .hl-bool { color: #79B8FF; }
+        #codeOutput .hl-num  { color: #FF9D7C; }
+        #codeOutput .hl-tag  { color: #6B8CAE; }
+        #codeOutput .hl-attr { color: #E5BF78; }
+
+        .mobile-tabs { display: none; }
+        .mobile-copy-btn { display: none; }
+
+        @media (max-width: 1023px) {
+            body { flex-direction: column; height: 100vh; overflow: hidden; }
+            .main-content { display: none; }
+            .sidebar {
+                position: fixed; top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom));
+                width: 100%; border-right: none; display: none;
+                flex-direction: column; z-index: 50;
+            }
+            .sidebar-header { flex-shrink: 0; }
+            .mobile-tabs {
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+                background: #fff; border-top: 1px solid #E5E5E5; z-index: 100;
+                height: 68px; padding: 8px 12px;
+                padding-bottom: calc(8px + env(safe-area-inset-bottom));
+                gap: 6px; align-items: stretch;
+            }
+            .tab-btn {
+                flex: 1; border: none; background: transparent; color: var(--text-tertiary);
+                font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer;
+                border-radius: 10px; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; gap: 4px;
+                transition: background 0.18s ease, color 0.18s ease;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .tab-btn svg { opacity: 0.5; transition: opacity 0.18s ease; }
+            .tab-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+            .tab-btn.active svg { opacity: 1; }
+            .mobile-copy-btn { display: flex; }
+            body.tab-edit .sidebar { display: flex; }
+            body.tab-preview .sidebar { display: none; }
+            body.tab-preview .main-content {
+                display: flex; position: fixed; top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom)); height: auto;
+            }
+            body.tab-preview .code-drawer { display: none; }
+            body.tab-code .sidebar { display: none; }
+            body.tab-code .main-content {
+                display: flex; position: fixed; top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom)); height: auto;
+            }
+            body.tab-code .preview-container { display: none; }
+            body.tab-code .code-drawer { flex: 1; height: auto; }
+        }
+
+        /* -------------------------------------------------------------
+           PREVIEW-ONLY overrides: make the mock carousel scroll without
+           the Swiper engine. carousel.css supplies all visual styling.
+        ------------------------------------------------------------- */
+        #previewHost { width: 100%; }
+        #previewHost .swiper { overflow: hidden; }
+        #previewHost .swiper-wrapper {
+            overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+            -ms-overflow-style: none; scrollbar-width: none; transition: none;
+        }
+        #previewHost .swiper-wrapper::-webkit-scrollbar { display: none; }
+        #previewHost .swiper-slide { scroll-snap-align: start; flex-shrink: 0; height: auto; }
+        #previewHost .navigation-button-prev,
+        #previewHost .navigation-button-next { pointer-events: auto; }
+        #previewHost .pagination-wrapper { display: flex; gap: 6px; align-items: center; justify-content: center; }
+        #previewHost .pv-bullet {
+            width: var(--sdl-cc-bullet-size, 8px); height: var(--sdl-cc-bullet-size, 8px);
+            border-radius: 50%; background: var(--sdl-cc-inactive-bullet-color, #b9b9b9);
+            opacity: var(--sdl-cc-inactive-bullet-opacity, 0.5); cursor: pointer; border: none;
+        }
+        #previewHost .pv-bullet.active { background: var(--sdl-cc-active-bullet-color, #222); opacity: var(--sdl-cc-active-bullet-opacity, 1); }
+        #previewHost .pv-fraction { font-size: 13px; color: #555; }
+        #previewHost .pv-progress { height: 4px; width: 100%; background: rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden; }
+        #previewHost .pv-progress span { display: block; height: 100%; background: var(--sdl-cc-active-bullet-color, #222); transition: width 0.2s; }
+    </style>
+</head>
+<body class="tab-edit">
+
+    <div class="mobile-tabs">
+        <button class="tab-btn active" onclick="setTab('edit')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+        </button>
+        <button class="tab-btn" onclick="setTab('preview')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Preview
+        </button>
+        <button class="tab-btn" onclick="setTab('code')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Code
+        </button>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>
+                <span class="brand-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="6" height="12" rx="1"/><rect x="9" y="4" width="6" height="16" rx="1"/><rect x="16" y="6" width="6" height="12" rx="1"/></svg>
+                </span>
+                Collection Carousel <span class="badge">v1.0</span>
+            </h2>
+            <button class="copy-btn mobile-copy-btn" id="mobileCopyBtn" onclick="copyCode()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                Copy
+            </button>
+        </div>
+        <div class="sidebar-content">
+
+            <!-- COLLECTION SOURCE -->
+            <div class="group open">
+                <div class="group-header" onclick="togGroup(this)">Collection Source</div>
+                <div class="group-body">
+                    <div class="control-row">
+                        <label>Source URL</label>
+                        <input type="text" id="source" value="/blog">
+                        <div class="helper-text">Squarespace collection path: <code>/blog</code>, <code>/portfolio</code>, <code>/shop</code>, <code>/events</code>.</div>
+                    </div>
+                    <div class="control-row">
+                        <label>Preview Collection Type</label>
+                        <select id="collectionType">
+                            <option value="blog">Blog</option>
+                            <option value="portfolio">Portfolio</option>
+                            <option value="products">Shop (Products)</option>
+                            <option value="event">Events</option>
+                        </select>
+                        <div class="helper-text">Only affects the preview's sample data. The plugin auto-detects the real type.</div>
+                    </div>
+                    <div class="control-row">
+                        <label>Element ID</label>
+                        <input type="text" id="elId" value="sdl-carousel">
+                    </div>
+                    <div class="control-row">
+                        <label>Item Limit</label>
+                        <input type="number" id="limit" value="20" min="1">
+                    </div>
+                    <div class="toggle-row"><label>Featured / Starred Only</label><input type="checkbox" id="featured"></div>
+                    <div class="control-row" id="eventsRow" style="display:none;">
+                        <label>Events Filter</label>
+                        <select id="events">
+                            <option value="all">All</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="past">Past</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYOUT & SLIDES -->
+            <div class="group open">
+                <div class="group-header" onclick="togGroup(this)">Layout & Slides</div>
+                <div class="group-body">
+                    <label>Slides Per View</label>
+                    <div class="control-row grid3">
+                        <div><label>Mobile</label><input type="number" id="spvSm" value="1" min="1" step="0.1"></div>
+                        <div><label>Tablet</label><input type="number" id="spvMd" value="2" min="1" step="0.1"></div>
+                        <div><label>Desktop</label><input type="number" id="spvLg" value="4" min="1" step="0.1"></div>
+                    </div>
+                    <label>Space Between (px)</label>
+                    <div class="control-row grid3">
+                        <div><label>Mobile</label><input type="number" id="sbSm" value="17"></div>
+                        <div><label>Tablet</label><input type="number" id="sbMd" value="34"></div>
+                        <div><label>Desktop</label><input type="number" id="sbLg" value="54"></div>
+                    </div>
+                    <div class="control-row">
+                        <label>Thumbnail Aspect Ratio</label>
+                        <select id="aspectRatio">
+                            <option value="auto">Auto (natural)</option>
+                            <option value="1/1">1 / 1 — Square</option>
+                            <option value="4/3" selected>4 / 3 — Landscape</option>
+                            <option value="3/2">3 / 2 — Landscape</option>
+                            <option value="16/9">16 / 9 — Widescreen</option>
+                            <option value="3/4">3 / 4 — Portrait</option>
+                            <option value="4/5">4 / 5 — Portrait</option>
+                        </select>
+                    </div>
+                    <div class="control-row grid2">
+                        <div><label>Transition Speed (ms)</label><input type="number" id="speed" value="300"></div>
+                        <div><label>Slides Per Group</label><input type="number" id="slidesPerGroup" value="1" min="1"></div>
+                    </div>
+                    <div class="toggle-row"><label>Group Slides (match per-view)</label><input type="checkbox" id="groupSlides"></div>
+                    <div class="toggle-row"><label>Centered Slides</label><input type="checkbox" id="centeredSlides"></div>
+                    <div class="toggle-row"><label>Full-Width (edge bleed)</label><input type="checkbox" id="fullWidth"></div>
+                </div>
+            </div>
+
+            <!-- LOOP & AUTOPLAY -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Loop & Autoplay</div>
+                <div class="group-body">
+                    <div class="toggle-row"><label>Infinite Loop</label><input type="checkbox" id="loop"></div>
+                    <div class="toggle-row"><label>Loop Fill (duplicate few items)</label><input type="checkbox" id="loopFillItems"></div>
+                    <div class="control-row">
+                        <label>Uneven Group Loop Strategy</label>
+                        <select id="groupSlidesLoopStrategy">
+                            <option value="keep-blanks">Keep blanks</option>
+                            <option value="disable-loop-when-uneven">Disable loop when uneven</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>Autoplay Delay (ms — 0 = off)</label>
+                        <input type="number" id="autoplay" value="0" min="0">
+                        <div class="helper-text">Values 1–9 are multiplied by 1000. Minimum 500ms.</div>
+                    </div>
+                    <div class="toggle-row"><label>Stop Autoplay On Interaction</label><input type="checkbox" id="autoplayDisableOnInteraction"></div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Navigation</div>
+                <div class="group-body">
+                    <div class="toggle-row"><label>Show Arrows</label><input type="checkbox" id="navigation" checked></div>
+                    <div class="control-row" id="navLayoutRow">
+                        <label>Arrow Layout</label>
+                        <select id="navigationLayout">
+                            <option value="overlay" selected>Overlay (center)</option>
+                            <option value="overlay image">Overlay image</option>
+                            <option value="top left">Top left</option>
+                            <option value="top right">Top right</option>
+                            <option value="top center">Top center</option>
+                            <option value="top spread">Top spread</option>
+                            <option value="bottom left">Bottom left</option>
+                            <option value="bottom right">Bottom right</option>
+                            <option value="bottom center">Bottom center</option>
+                            <option value="bottom spread">Bottom spread</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Pagination</div>
+                <div class="group-body">
+                    <div class="toggle-row"><label>Show Pagination</label><input type="checkbox" id="pagination" checked></div>
+                    <div class="control-row">
+                        <label>Type</label>
+                        <select id="paginationType">
+                            <option value="bullets" selected>Bullets</option>
+                            <option value="fraction">Fraction</option>
+                            <option value="progressbar">Progress bar</option>
+                        </select>
+                    </div>
+                    <div class="toggle-row" id="dynBulletsRow"><label>Dynamic Bullets</label><input type="checkbox" id="dynamicBullets"></div>
+                    <div class="control-row" id="dynMainRow" style="display:none;">
+                        <label>Main Bullets (dynamic)</label>
+                        <input type="number" id="dynamicMainBullets" value="8" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- EFFECTS -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Slide Effect</div>
+                <div class="group-body">
+                    <div class="control-row">
+                        <label>Effect</label>
+                        <select id="effect">
+                            <option value="">None (slide)</option>
+                            <option value="fade">Fade</option>
+                            <option value="flip">Flip</option>
+                            <option value="cube">Cube</option>
+                            <option value="coverflow">Coverflow</option>
+                            <option value="cards">Cards</option>
+                            <option value="creative-coverflow">Creative coverflow</option>
+                            <option value="creative-coverflow-2">Creative coverflow 2</option>
+                        </select>
+                    </div>
+                    <div id="coverflowOpts" style="display:none;">
+                        <div class="control-row grid2">
+                            <div><label>Rotate</label><input type="number" id="coverflowRotate" value="50"></div>
+                            <div><label>Scale</label><input type="number" id="coverflowScale" value="0.85" step="0.05"></div>
+                        </div>
+                        <div class="toggle-row"><label>Slide Shadows</label><input type="checkbox" id="coverflowSlideShadows"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTERACTION -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Interaction</div>
+                <div class="group-body">
+                    <div class="toggle-row"><label>Free Mode (momentum scroll)</label><input type="checkbox" id="freeMode"></div>
+                    <div class="toggle-row"><label>Mousewheel Scroll</label><input type="checkbox" id="mousewheel"></div>
+                </div>
+            </div>
+
+            <!-- CONTENT DISPLAY -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Content Display</div>
+                <div class="group-body">
+                    <div class="toggle-row"><label>Thumbnail Image</label><input type="checkbox" id="thumbnail" checked></div>
+                    <div class="toggle-row"><label>Title</label><input type="checkbox" id="title" checked></div>
+                    <div class="toggle-row"><label>Excerpt</label><input type="checkbox" id="excerpt" checked></div>
+                    <div class="toggle-row"><label>Price (Shop)</label><input type="checkbox" id="price" checked></div>
+                    <div class="toggle-row"><label>Event Dates (Events)</label><input type="checkbox" id="eventDates" checked></div>
+                    <div class="toggle-row"><label>Categories</label><input type="checkbox" id="categories" checked></div>
+                    <div class="toggle-row"><label>Tags</label><input type="checkbox" id="tags" checked></div>
+                    <div class="toggle-row"><label>Clickthrough Links</label><input type="checkbox" id="clickthrough" checked></div>
+                    <div class="toggle-row"><label>Open In New Window</label><input type="checkbox" id="newWindow"></div>
+                </div>
+            </div>
+
+            <!-- METADATA -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Metadata</div>
+                <div class="group-body">
+                    <div class="helper-text" style="margin-top:0;margin-bottom:12px;">Comma-separated fields: <code>publisheddate</code>, <code>author</code>, <code>categories</code>, <code>tags</code>.</div>
+                    <div class="control-row"><label>Above Title</label><input type="text" id="metadataAboveTitle" placeholder="publisheddate, author"></div>
+                    <div class="control-row"><label>Below Title</label><input type="text" id="metadataBelowTitle" placeholder="categories"></div>
+                    <div class="control-row"><label>Below Excerpt</label><input type="text" id="metadataBelowExcerpt" placeholder="tags"></div>
+                    <div class="control-row grid3">
+                        <div><label>Meta delim</label><input type="text" id="metadataDelimiter" value="|"></div>
+                        <div><label>Cat delim</label><input type="text" id="categoriesDelimiter" value=", "></div>
+                        <div><label>Tag delim</label><input type="text" id="tagsDelimiter" value=", "></div>
+                    </div>
+                    <div class="toggle-row"><label>Link Categories</label><input type="checkbox" id="metadataCategoryLinks"></div>
+                    <div class="toggle-row"><label>Link Tags</label><input type="checkbox" id="metadataTagLinks"></div>
+                </div>
+            </div>
+
+            <!-- STYLING -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Styling (CSS Variables)</div>
+                <div class="group-body">
+                    <div class="control-row grid2">
+                        <div><label>Border Radius (px)</label><input type="number" id="borderRadius" value="0"></div>
+                        <div><label>Arrow Size (px)</label><input type="number" id="arrowSize" value="26"></div>
+                    </div>
+                    <div class="control-row grid2">
+                        <div><label>Arrow Button Ø (px)</label><input type="number" id="arrowBgSize" value="40"></div>
+                        <div><label>Bullet Size (px)</label><input type="number" id="bulletSize" value="8"></div>
+                    </div>
+                    <div class="color-row">
+                        <div class="color-chip"><span class="color-label">Arrow Color</span><input type="color" id="arrowColor" value="#000000"></div>
+                        <div class="color-chip"><span class="color-label">Arrow Background</span><input type="color" id="arrowBg" value="#ffffff"></div>
+                        <div class="color-chip"><span class="color-label">Active Bullet</span><input type="color" id="activeBullet" value="#222222"></div>
+                        <div class="color-chip"><span class="color-label">Title Color</span><input type="color" id="titleColor" value="#1a1a1a"></div>
+                        <div class="color-chip"><span class="color-label">Excerpt Color</span><input type="color" id="excerptColor" value="#666666"></div>
+                    </div>
+                    <div class="helper-text">Only changed values are written into a scoped <code>&lt;style&gt;</code> block.</div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE -->
+            <div class="group">
+                <div class="group-header" onclick="togGroup(this)">Performance & Integration</div>
+                <div class="group-body">
+                    <div class="control-row">
+                        <label>Cache Duration (minutes — 0 = off)</label>
+                        <input type="number" id="cacheDuration" value="0" min="0">
+                    </div>
+                    <div class="toggle-row"><label>SDL Popups Integration</label><input type="checkbox" id="sdlPopups"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div class="device-toggle">
+                <button id="desktopToggle" class="active" onclick="setDev('desktop')">Desktop</button>
+                <button id="mobileToggle" onclick="setDev('mobile')">Mobile</button>
+            </div>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                Copy Code
+            </button>
+        </div>
+
+        <div class="preview-container">
+            <div id="previewFrame"></div>
+        </div>
+
+        <div class="code-drawer">
+            <div class="drawer-header"><h3>Installation Code</h3></div>
+            <pre id="codeOutput"></pre>
+        </div>
+    </div>
+
+    <script>
+      try {
+        /* ----------------------------- defaults ----------------------------- */
+        const DEFAULTS = {
+          limit: 20, speed: 300, featured: false, events: "all",
+          spvSm: 1, spvMd: 2, spvLg: 4, sbSm: 17, sbMd: 34, sbLg: 54,
+          aspectRatio: "4/3", slidesPerGroup: 1, groupSlides: false,
+          centeredSlides: false, fullWidth: false,
+          loop: false, loopFillItems: false, groupSlidesLoopStrategy: "keep-blanks",
+          autoplay: 0, autoplayDisableOnInteraction: false,
+          navigation: true, navigationLayout: "overlay",
+          pagination: true, paginationType: "bullets", dynamicBullets: false, dynamicMainBullets: 8,
+          effect: "", coverflowRotate: 50, coverflowScale: 0.85, coverflowSlideShadows: false,
+          freeMode: false, mousewheel: false,
+          thumbnail: true, title: true, excerpt: true, price: true, eventDates: true,
+          categories: true, tags: true, clickthrough: true, newWindow: false,
+          metadataAboveTitle: "", metadataBelowTitle: "", metadataBelowExcerpt: "",
+          metadataDelimiter: "|", categoriesDelimiter: ", ", tagsDelimiter: ", ",
+          metadataCategoryLinks: false, metadataTagLinks: false,
+          cacheDuration: 0, sdlPopups: false
+        };
+
+        const val = id => document.getElementById(id).value;
+        const num = id => parseFloat(document.getElementById(id).value) || 0;
+        const chk = id => document.getElementById(id).checked;
+
+        /* ----------------------------- mock data ---------------------------- */
+        const PALETTES = [
+          ["#EDE9FE","#C7D2FE"], ["#FCE7F3","#FBCFE8"], ["#DCFCE7","#A7F3D0"],
+          ["#FEF3C7","#FDE68A"], ["#DBEAFE","#BFDBFE"], ["#FEE2E2","#FECACA"],
+          ["#E0E7FF","#C7D2FE"], ["#F0FDFA","#99F6E4"]
+        ];
+        const CATEGORIES = ["Design","Strategy","Brand","Studio","Culture"];
+        const TAGS = ["minimal","editorial","modern","craft","story"];
+        const AUTHORS = ["Alex Kim","Jordan Lee","Taylor Morgan","Riley Chen"];
+        function mockImage(i) {
+          const [a,b] = PALETTES[i % PALETTES.length];
+          const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='450'><rect width='600' height='450' fill='${a}'/><circle cx='300' cy='235' r='130' fill='${b}'/><rect x='0' y='0' width='600' height='450' fill='none'/></svg>`;
+          return "data:image/svg+xml," + encodeURIComponent(svg);
+        }
+        function buildMock(type, count) {
+          return Array.from({ length: count }, (_, i) => ({
+            title: type === "products" ? `Product ${i+1}` : type === "event" ? `Event ${i+1}` : `Sample Post ${i+1}`,
+            excerpt: "A short excerpt describing this collection item with a sentence of supporting copy.",
+            img: mockImage(i),
+            price: "$" + (24 + i * 5) + ".00",
+            date: new Date(2025, i % 12, (i % 27) + 1).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            author: AUTHORS[i % AUTHORS.length],
+            categories: [CATEGORIES[i % CATEGORIES.length], CATEGORIES[(i+2) % CATEGORIES.length]],
+            tags: [TAGS[i % TAGS.length], TAGS[(i+1) % TAGS.length]]
+          }));
+        }
+
+        /* --------------------------- preview render ------------------------- */
+        let autoplayTimer = null;
+        const host = document.getElementById("previewFrame");
+
+        function metaField(name, item) {
+          name = name.trim().toLowerCase();
+          if (!name) return null;
+          if (name === "publisheddate" || name === "publishdate" || name === "date")
+            return `<div class="published-on metadata"><p>${item.date}</p></div>`;
+          if (name === "author") return `<div class="author metadata"><p>${item.author}</p></div>`;
+          if (name === "categories")
+            return `<div class="categories metadata"><ul>${item.categories.map(c=>`<li><span class="category" rel="category">${c}</span></li>`).join(" ")}</ul></div>`;
+          if (name === "tags")
+            return `<div class="tags metadata"><ul>${item.tags.map(t=>`<li><span class="tag" rel="tag">${t}</span></li>`).join(" ")}</ul></div>`;
+          return null;
+        }
+        function metaGroup(csv, item, cls, delim) {
+          const fields = (csv || "").split(",").map(s=>s.trim()).filter(Boolean);
+          if (!fields.length) return "";
+          const parts = fields.map(f => metaField(f, item)).filter(Boolean);
+          if (!parts.length) return "";
+          const joined = parts.join(`<span class="metadata-delimiter metadata">${delim}</span>`);
+          return `<div class="${cls} metadata-group">${joined}</div>`;
+        }
+
+        function render() {
+          if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+
+          const cfg = readConfig();
+          const isMobile = host.classList.contains("mobile");
+          const spv = Math.max(1, isMobile ? cfg.spvSm : cfg.spvLg);
+          const gap = isMobile ? cfg.sbSm : cfg.sbLg;
+          const type = cfg.collectionType;
+          const oneSlideEffects = ["fade","flip","cube"];
+          const effectiveSpv = oneSlideEffects.includes(cfg.effect) ? 1 : spv;
+
+          const items = buildMock(type, Math.min(cfg.limit, 12));
+
+          const slidesHTML = items.map(item => {
+            let thumb = "";
+            if (cfg.thumbnail) {
+              const img = `<img src="${item.img}" alt="${item.title}" style="object-fit:cover">`;
+              thumb = `<div class="slide-thumbnail">${img}${cfg.clickthrough ? '<a class="slide-thumbnail-link" href="#"></a>' : ""}</div>`;
+            }
+            const titleHTML = cfg.title ? `<div class="content-title"><h3>${cfg.clickthrough ? `<a href="#">${item.title}</a>` : item.title}</h3></div>` : "";
+            const excerptHTML = (cfg.excerpt) ? `<div class="content-excerpt">${item.excerpt}</div>` : "";
+            const priceHTML = (cfg.price && type === "products") ? `<div class="content-price"><p class="price">${item.price}</p></div>` : "";
+            const datesHTML = (cfg.eventDates && type === "event") ? `<div class="content-event-dates"><p class="event-dates">${item.date} · 7:00 PM</p></div>` : "";
+            const above = metaGroup(cfg.metadataAboveTitle, item, "content-metadata-above-title", cfg.metadataDelimiter);
+            const belowT = metaGroup(cfg.metadataBelowTitle, item, "content-metadata-below-title", cfg.metadataDelimiter);
+            const belowE = metaGroup(cfg.metadataBelowExcerpt, item, "content-metadata-below-excerpt", cfg.metadataDelimiter);
+
+            const order = ["metadataAboveTitle","title","metadataBelowTitle","price","eventDates","excerpt","metadataBelowExcerpt"];
+            const pieces = { metadataAboveTitle: above, title: titleHTML, metadataBelowTitle: belowT, price: priceHTML, eventDates: datesHTML, excerpt: excerptHTML, metadataBelowExcerpt: belowE };
+            const content = `<div class="slide-content">${order.map(k=>pieces[k]||"").join("")}</div>`;
+            return `<div class="swiper-slide collection-carousel-slide">${thumb}${content}</div>`;
+          }).join("");
+
+          let navHTML = "";
+          if (cfg.navigation) {
+            const arrowPrev = `<svg class="user-items-list-carousel__arrow-icon" viewBox="0 0 44 18"><path class="user-items-list-carousel__arrow-icon-path" d="M9.90649 16.96L2.1221 9.17556L9.9065 1.39116"></path><path class="user-items-list-carousel__arrow-icon-path" d="M42.8633 9.18125L3.37868 9.18125"></path></svg>`;
+            const arrowNext = `<svg class="user-items-list-carousel__arrow-icon" viewBox="0 0 44 18"><path class="user-items-list-carousel__arrow-icon-path" d="M34.1477 1.39111L41.9321 9.17551L34.1477 16.9599"></path><path class="user-items-list-carousel__arrow-icon-path" d="M1.19088 9.16982H40.6755"></path></svg>`;
+            navHTML = `<div class="navigation-wrapper">
+              <div class="navigation-button-prev"><button><div class="swiper-button-background"></div>${arrowPrev}</button></div>
+              <div class="navigation-button-next"><button><div class="swiper-button-background"></div>${arrowNext}</button></div>
+            </div>`;
+          }
+          let pagHTML = cfg.pagination ? `<div class="collection-carousel-pagination"><div class="pagination-wrapper"></div></div>` : "";
+
+          host.innerHTML = `<div id="previewHost" data-sdl-plugin="collection-carousel" data-navigation-layout="${cfg.navigation ? cfg.navigationLayout : ''}">
+            ${navHTML}
+            <div class="swiper collection-carousel"><div class="swiper-wrapper">${slidesHTML}</div></div>
+            ${pagHTML}
+          </div>`;
+
+          const root = document.getElementById("previewHost");
+          applyStyleVars(root, cfg);
+
+          // size slides
+          const wrapper = root.querySelector(".swiper-wrapper");
+          wrapper.style.gap = gap + "px";
+          const slides = [...root.querySelectorAll(".swiper-slide")];
+          slides.forEach(s => { s.style.width = `calc((100% - ${(effectiveSpv-1)*gap}px) / ${effectiveSpv})`; });
+
+          // nav layout: bottom layouts move pagination into the nav row
+          if (cfg.navigation && cfg.navigationLayout.includes("bottom") && cfg.pagination) {
+            root.querySelector(".navigation-wrapper").appendChild(root.querySelector(".collection-carousel-pagination"));
+          }
+
+          wireControls(root, wrapper, slides, gap, effectiveSpv, cfg);
+
+          host.querySelectorAll(".effect-note").forEach(n=>n.remove());
+          if (["coverflow","cards","flip","cube","creative-coverflow","creative-coverflow-2"].includes(cfg.effect)) {
+            const note = document.createElement("div");
+            note.className = "effect-note";
+            note.textContent = `3D "${cfg.effect}" motion renders live on your site — the preview shows layout & content.`;
+            host.appendChild(note);
+          }
+        }
+
+        function wireControls(root, wrapper, slides, gap, spv, cfg) {
+          const step = () => (slides[0] ? slides[0].getBoundingClientRect().width + gap : 300);
+          const prevBtn = root.querySelector(".navigation-button-prev button");
+          const nextBtn = root.querySelector(".navigation-button-next button");
+          const slideNext = () => {
+            if (wrapper.scrollLeft + wrapper.clientWidth >= wrapper.scrollWidth - 4) wrapper.scrollTo({ left: 0 });
+            else wrapper.scrollBy({ left: step() });
+          };
+          if (prevBtn) prevBtn.onclick = () => wrapper.scrollBy({ left: -step() });
+          if (nextBtn) nextBtn.onclick = slideNext;
+
+          // pagination
+          const pagWrap = root.querySelector(".pagination-wrapper");
+          if (pagWrap) {
+            const pageCount = Math.max(1, Math.ceil(slides.length - spv + 1));
+            if (cfg.paginationType === "fraction") {
+              pagWrap.innerHTML = `<span class="pv-fraction"><span class="cur">1</span> / ${slides.length}</span>`;
+            } else if (cfg.paginationType === "progressbar") {
+              pagWrap.innerHTML = `<div class="pv-progress"><span style="width:${100/Math.max(1,slides.length)}%"></span></div>`;
+            } else {
+              pagWrap.innerHTML = Array.from({ length: pageCount }, (_, i) => `<button class="pv-bullet${i===0?' active':''}" data-i="${i}"></button>`).join("");
+              pagWrap.querySelectorAll(".pv-bullet").forEach(b => b.onclick = () => wrapper.scrollTo({ left: step() * parseInt(b.dataset.i) }));
+            }
+            wrapper.onscroll = () => {
+              const idx = Math.round(wrapper.scrollLeft / step());
+              if (cfg.paginationType === "bullets") {
+                pagWrap.querySelectorAll(".pv-bullet").forEach((b,i)=>b.classList.toggle("active", i===idx));
+              } else if (cfg.paginationType === "fraction") {
+                const cur = pagWrap.querySelector(".cur"); if (cur) cur.textContent = Math.min(slides.length, idx+1);
+              } else if (cfg.paginationType === "progressbar") {
+                const bar = pagWrap.querySelector(".pv-progress span");
+                const pct = (wrapper.scrollLeft / (wrapper.scrollWidth - wrapper.clientWidth || 1)) * 100;
+                if (bar) bar.style.width = Math.max(100/slides.length, pct) + "%";
+              }
+            };
+          }
+
+          if (cfg.autoplay > 0) {
+            let delay = cfg.autoplay; if (delay < 10) delay *= 1000; delay = Math.max(500, delay);
+            autoplayTimer = setInterval(slideNext, delay);
+          }
+        }
+
+        function applyStyleVars(root, cfg) {
+          const set = (k,v) => root.style.setProperty(k, v);
+          if (cfg.aspectRatio !== "auto") set("--sdl-cc-aspect-ratio", cfg.aspectRatio);
+          set("--sdl-cc-border-radius", cfg.borderRadius + "px");
+          set("--sdl-cc-arrow-size", cfg.arrowSize + "px");
+          set("--sdl-cc-arrow-background-size", cfg.arrowBgSize + "px");
+          set("--sdl-cc-bullet-size", cfg.bulletSize + "px");
+          set("--sdl-cc-arrow-color", cfg.arrowColor);
+          set("--sdl-cc-arrow-background-color", cfg.arrowBg);
+          set("--sdl-cc-active-bullet-color", cfg.activeBullet);
+          set("--sdl-cc-inactive-bullet-color", cfg.activeBullet);
+          set("--sdl-cc-title-color", cfg.titleColor);
+          set("--sdl-cc-excerpt-color", cfg.excerptColor);
+        }
+
+        /* ----------------------------- read config -------------------------- */
+        function readConfig() {
+          return {
+            elId: val("elId") || "sdl-carousel",
+            source: val("source"),
+            collectionType: val("collectionType"),
+            limit: Math.max(1, num("limit")),
+            featured: chk("featured"),
+            events: val("events"),
+            spvSm: num("spvSm"), spvMd: num("spvMd"), spvLg: num("spvLg"),
+            sbSm: num("sbSm"), sbMd: num("sbMd"), sbLg: num("sbLg"),
+            aspectRatio: val("aspectRatio"),
+            speed: num("speed"), slidesPerGroup: num("slidesPerGroup"), groupSlides: chk("groupSlides"),
+            centeredSlides: chk("centeredSlides"), fullWidth: chk("fullWidth"),
+            loop: chk("loop"), loopFillItems: chk("loopFillItems"), groupSlidesLoopStrategy: val("groupSlidesLoopStrategy"),
+            autoplay: num("autoplay"), autoplayDisableOnInteraction: chk("autoplayDisableOnInteraction"),
+            navigation: chk("navigation"), navigationLayout: val("navigationLayout"),
+            pagination: chk("pagination"), paginationType: val("paginationType"),
+            dynamicBullets: chk("dynamicBullets"), dynamicMainBullets: num("dynamicMainBullets"),
+            effect: val("effect"), coverflowRotate: num("coverflowRotate"), coverflowScale: num("coverflowScale"), coverflowSlideShadows: chk("coverflowSlideShadows"),
+            freeMode: chk("freeMode"), mousewheel: chk("mousewheel"),
+            thumbnail: chk("thumbnail"), title: chk("title"), excerpt: chk("excerpt"), price: chk("price"),
+            eventDates: chk("eventDates"), categories: chk("categories"), tags: chk("tags"),
+            clickthrough: chk("clickthrough"), newWindow: chk("newWindow"),
+            metadataAboveTitle: val("metadataAboveTitle"), metadataBelowTitle: val("metadataBelowTitle"), metadataBelowExcerpt: val("metadataBelowExcerpt"),
+            metadataDelimiter: val("metadataDelimiter"), categoriesDelimiter: val("categoriesDelimiter"), tagsDelimiter: val("tagsDelimiter"),
+            metadataCategoryLinks: chk("metadataCategoryLinks"), metadataTagLinks: chk("metadataTagLinks"),
+            cacheDuration: num("cacheDuration"), sdlPopups: chk("sdlPopups"),
+            borderRadius: num("borderRadius"), arrowSize: num("arrowSize"), arrowBgSize: num("arrowBgSize"), bulletSize: num("bulletSize"),
+            arrowColor: val("arrowColor"), arrowBg: val("arrowBg"), activeBullet: val("activeBullet"),
+            titleColor: val("titleColor"), excerptColor: val("excerptColor")
+          };
+        }
+
+        /* ---------------------------- code generation ----------------------- */
+        let rawCode = "";
+        function attr(name, value) { return `\n  data-${name}="${value}"`; }
+
+        function generateCode() {
+          const c = readConfig();
+          let attrs = "";
+          attrs += attr("source", c.source);
+          const add = (cond, name, value) => { if (cond) attrs += attr(name, value); };
+
+          add(c.limit !== DEFAULTS.limit, "limit", c.limit);
+          add(c.featured, "featured", "true");
+          add(c.events !== DEFAULTS.events, "events", c.events);
+
+          add(c.spvSm !== DEFAULTS.spvSm, "slides-per-view-sm", c.spvSm);
+          add(c.spvMd !== DEFAULTS.spvMd, "slides-per-vies-dld", c.spvMd);
+          add(c.spvLg !== DEFAULTS.spvLg, "slides-per-view-lg", c.spvLg);
+          add(c.sbSm !== DEFAULTS.sbSm, "space-between-sm", c.sbSm);
+          add(c.sbMd !== DEFAULTS.sbMd, "space-between-md", c.sbMd);
+          add(c.sbLg !== DEFAULTS.sbLg, "space-between-lg", c.sbLg);
+          add(c.aspectRatio !== DEFAULTS.aspectRatio, "aspect-ratio", c.aspectRatio);
+          add(c.speed !== DEFAULTS.speed, "speed", c.speed);
+          add(c.slidesPerGroup !== DEFAULTS.slidesPerGroup, "slides-per-group", c.slidesPerGroup);
+          add(c.groupSlides, "group-slides", "true");
+          add(c.centeredSlides, "centered-slides", "true");
+          add(c.fullWidth, "full-width", "true");
+
+          add(c.loop, "loop", "true");
+          add(c.loopFillItems, "loop-fill-items", "true");
+          add(c.loop && c.groupSlidesLoopStrategy !== DEFAULTS.groupSlidesLoopStrategy, "group-slides-loop-strategy", c.groupSlidesLoopStrategy);
+          add(c.autoplay > 0, "autoplay", c.autoplay);
+          add(c.autoplay > 0 && c.autoplayDisableOnInteraction, "autoplay-disable-on-interaction", "true");
+
+          add(!c.navigation, "navigation", "false");
+          add(c.navigation && c.navigationLayout !== DEFAULTS.navigationLayout, "navigation-layout", c.navigationLayout);
+
+          add(!c.pagination, "pagination", "false");
+          add(c.pagination && c.paginationType !== DEFAULTS.paginationType, "pagination-type", c.paginationType);
+          add(c.pagination && c.dynamicBullets, "dynamic-bullets", c.dynamicMainBullets);
+
+          add(!!c.effect, "effect", c.effect);
+          add(c.effect === "coverflow" && c.coverflowRotate !== DEFAULTS.coverflowRotate, "coverflow-rotate", c.coverflowRotate);
+          add(c.effect === "coverflow" && c.coverflowScale !== DEFAULTS.coverflowScale, "coverflow-scale", c.coverflowScale);
+          add(c.effect === "coverflow" && c.coverflowSlideShadows, "coverflow-slide-shadows", "true");
+
+          add(c.freeMode, "free-mode", "true");
+          add(c.mousewheel && !c.freeMode, "mousewheel", "true");
+
+          add(!c.thumbnail, "thumbnail", "false");
+          add(!c.title, "title", "false");
+          add(!c.excerpt, "excerpt", "false");
+          add(!c.price, "price", "false");
+          add(!c.eventDates, "event-dates", "false");
+          add(!c.categories, "categories", "false");
+          add(!c.tags, "tags", "false");
+          add(!c.clickthrough, "clickthrough", "false");
+          add(c.newWindow, "new-window", "true");
+
+          add(!!c.metadataAboveTitle.trim(), "metadata-above-title", c.metadataAboveTitle);
+          add(!!c.metadataBelowTitle.trim(), "metadata-below-title", c.metadataBelowTitle);
+          add(!!c.metadataBelowExcerpt.trim(), "metadata-below-excerpt", c.metadataBelowExcerpt);
+          add(c.metadataDelimiter !== DEFAULTS.metadataDelimiter, "metadata-delimiter", c.metadataDelimiter);
+          add(c.categoriesDelimiter !== DEFAULTS.categoriesDelimiter, "categories-delimiter", c.categoriesDelimiter);
+          add(c.tagsDelimiter !== DEFAULTS.tagsDelimiter, "tags-delimiter", c.tagsDelimiter);
+          add(c.metadataCategoryLinks, "metadata-category-links", "true");
+          add(c.metadataTagLinks, "metadata-tag-links", "true");
+
+          add(c.cacheDuration > 0, "cache-duration", c.cacheDuration);
+          add(c.sdlPopups, "sdl-popups", "true");
+
+          // scoped style block for changed CSS variables
+          const vars = [];
+          if (c.borderRadius !== 0) vars.push(`  --sdl-cc-border-radius: ${c.borderRadius}px;`);
+          if (c.arrowSize !== 26) vars.push(`  --sdl-cc-arrow-size: ${c.arrowSize}px;`);
+          if (c.arrowBgSize !== 40) vars.push(`  --sdl-cc-arrow-background-size: ${c.arrowBgSize}px;`);
+          if (c.bulletSize !== 8) vars.push(`  --sdl-cc-bullet-size: ${c.bulletSize}px;`);
+          if (c.arrowColor !== "#000000") vars.push(`  --sdl-cc-arrow-color: ${c.arrowColor};`);
+          if (c.arrowBg !== "#ffffff") vars.push(`  --sdl-cc-arrow-background-color: ${c.arrowBg};`);
+          if (c.activeBullet !== "#222222") { vars.push(`  --sdl-cc-active-bullet-color: ${c.activeBullet};`); vars.push(`  --sdl-cc-inactive-bullet-color: ${c.activeBullet};`); }
+          if (c.titleColor !== "#1a1a1a") vars.push(`  --sdl-cc-title-color: ${c.titleColor};`);
+          if (c.excerptColor !== "#666666") vars.push(`  --sdl-cc-excerpt-color: ${c.excerptColor};`);
+
+          const styleBlock = vars.length ? `<style>\n#${c.elId} {\n${vars.join("\n")}\n}\n</style>\n` : "";
+
+          const code =
+`<!-- 1. Add once in Settings → Advanced → Code Injection → Footer -->
+<link rel="stylesheet" href="carousel.css">
+<script src="carousel.js"><\/script>
+
+<!-- 2. Add a Code Block where you want the carousel -->
+${styleBlock}<div id="${c.elId}"
+  data-sdl-plugin="collection-carousel"${attrs}>
+</div>`;
+
+          rawCode = code;
+          document.getElementById("codeOutput").innerHTML = highlight(code);
+        }
+
+        function highlight(text) {
+          const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+          return esc(text).split("\n").map(line => {
+            let h = line;
+            h = h.replace(/(data-[\w-]+)(=)/g, '<span class="hl-attr">$1</span>$2');
+            h = h.replace(/(=)(&quot;[^&]*&quot;|"[^"]*")/g, (m,e,v)=>`${e}<span class="hl-str">${v}</span>`);
+            h = h.replace(/(&lt;\/?[\w!-]+)/g, '<span class="hl-tag">$1</span>');
+            return h;
+          }).join("\n");
+        }
+
+        /* ----------------------------- conditional rows --------------------- */
+        function syncRows() {
+          document.getElementById("eventsRow").style.display = val("collectionType") === "event" ? "block" : "none";
+          document.getElementById("navLayoutRow").style.display = chk("navigation") ? "block" : "none";
+          document.getElementById("dynBulletsRow").style.display = (chk("pagination") && val("paginationType") === "bullets") ? "flex" : "none";
+          document.getElementById("dynMainRow").style.display = (chk("pagination") && val("paginationType") === "bullets" && chk("dynamicBullets")) ? "block" : "none";
+          document.getElementById("coverflowOpts").style.display = val("effect") === "coverflow" ? "block" : "none";
+        }
+
+        /* ------------------------------- update ----------------------------- */
+        function updateAll() {
+          syncRows();
+          render();
+          generateCode();
+        }
+
+        document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", updateAll));
+
+        window.setTab = function(t) {
+          document.body.className = "tab-" + t;
+          document.querySelectorAll(".tab-btn").forEach(btn => {
+            btn.classList.toggle("active", btn.getAttribute("onclick") === "setTab('" + t + "')");
+          });
+          if (t === "preview") render();
+        };
+        window.setDev = function(d) {
+          document.getElementById("previewFrame").className = d === "mobile" ? "mobile" : "";
+          document.querySelectorAll(".device-toggle button").forEach(b => b.classList.remove("active"));
+          document.getElementById(d + "Toggle").classList.add("active");
+          render();
+        };
+        window.togGroup = function(h) { h.parentNode.classList.toggle("open"); };
+        window.copyCode = function() {
+          navigator.clipboard.writeText(rawCode);
+          const copied = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+          ["copyBtn","mobileCopyBtn"].forEach(id => {
+            const btn = document.getElementById(id); if (!btn) return;
+            const orig = btn.innerHTML; btn.innerHTML = copied; btn.classList.add("copied");
+            setTimeout(() => { btn.innerHTML = orig; btn.classList.remove("copied"); }, 2000);
+          });
+        };
+
+        updateAll();
+      } catch (err) {
+        document.body.innerHTML = '<div style="padding:40px;font-family:monospace"><h1>Config error</h1><pre>' + err.message + "\n" + err.stack + "</pre></div>";
+      }
+    </script>
+</body>
+</html>

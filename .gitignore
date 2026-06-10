@@ -1,0 +1,7 @@
+# Raw source (bundled into carousel.js / carousel.css)
+plugin.js
+plugin.css
+
+# OS / editor
+.DS_Store
+Thumbs.db
