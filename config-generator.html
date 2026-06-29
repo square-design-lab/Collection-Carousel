@@ -138,6 +138,12 @@
         .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .grid2 label, .grid3 label { font-size: 12px; }
 
+        .meta-block { border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px; margin-bottom: 12px; }
+        .meta-block .toggle-row:first-child { margin-bottom: 0; }
+        .meta-detail { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-light); }
+        .meta-detail.hidden { display: none; }
+        .pill-style { margin-top: 4px; }
+
         .toggle-row {
             display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 12px; min-height: 24px;
@@ -520,7 +526,18 @@
                 <div class="group-header" onclick="togGroup(this)">Interaction</div>
                 <div class="group-body">
                     <div class="toggle-row"><label>Free Mode (momentum scroll)</label><input type="checkbox" id="freeMode"></div>
-                    <div class="toggle-row"><label>Mousewheel Scroll</label><input type="checkbox" id="mousewheel"></div>
+                    <div class="toggle-row"><label>Mousewheel / Trackpad Scroll</label><input type="checkbox" id="mousewheel"></div>
+                    <div class="helper-text" style="margin-top:-4px;margin-bottom:12px;">Keyboard arrow-key navigation is always on (when the carousel is in view).</div>
+                    <div class="toggle-row"><label>Draggable Scrollbar</label><input type="checkbox" id="scrollbar"></div>
+                    <div class="toggle-row" id="scrollbarDragRow" style="display:none;"><label>Scrollbar Is Draggable</label><input type="checkbox" id="scrollbarDraggable" checked></div>
+                    <div class="color-row" id="scrollbarStyleRow" style="display:none;">
+                        <div class="color-chip"><span class="color-label">Track Color</span><input type="color" id="scrollbarTrackColor" value="#e7e7e7"></div>
+                        <div class="color-chip"><span class="color-label">Handle Color</span><input type="color" id="scrollbarDragColor" value="#222222"></div>
+                        <div class="control-row grid2" style="margin:0;">
+                            <div><label>Track Height (px)</label><input type="number" id="scrollbarSize" value="4" min="1"></div>
+                            <div><label>Radius (px)</label><input type="number" id="scrollbarRadius" value="10" min="0"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -532,29 +549,88 @@
                     <div class="toggle-row"><label>Title</label><input type="checkbox" id="title" checked></div>
                     <div class="toggle-row"><label>Excerpt</label><input type="checkbox" id="excerpt" checked></div>
                     <div class="toggle-row"><label>Price (Shop)</label><input type="checkbox" id="price" checked></div>
-                    <div class="toggle-row"><label>Event Dates (Events)</label><input type="checkbox" id="eventDates" checked></div>
-                    <div class="toggle-row"><label>Categories</label><input type="checkbox" id="categories" checked></div>
-                    <div class="toggle-row"><label>Tags</label><input type="checkbox" id="tags" checked></div>
                     <div class="toggle-row"><label>Clickthrough Links</label><input type="checkbox" id="clickthrough" checked></div>
                     <div class="toggle-row"><label>Open In New Window</label><input type="checkbox" id="newWindow"></div>
                 </div>
             </div>
 
-            <!-- METADATA -->
+            <!-- CATEGORIES, TAGS & DATES -->
             <div class="group">
-                <div class="group-header" onclick="togGroup(this)">Metadata</div>
+                <div class="group-header" onclick="togGroup(this)">Categories, Tags & Dates</div>
                 <div class="group-body">
-                    <div class="helper-text" style="margin-top:0;margin-bottom:12px;">Comma-separated fields: <code>publisheddate</code>, <code>author</code>, <code>categories</code>, <code>tags</code>.</div>
-                    <div class="control-row"><label>Above Title</label><input type="text" id="metadataAboveTitle" placeholder="publisheddate, author"></div>
-                    <div class="control-row"><label>Below Title</label><input type="text" id="metadataBelowTitle" placeholder="categories"></div>
-                    <div class="control-row"><label>Below Excerpt</label><input type="text" id="metadataBelowExcerpt" placeholder="tags"></div>
-                    <div class="control-row grid3">
+                    <div class="helper-text" style="margin-top:0;margin-bottom:14px;">Toggle each element on, choose where it appears, and style it. Positions include overlays on the image.</div>
+
+                    <!-- Categories -->
+                    <div class="meta-block">
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Categories</label><input type="checkbox" id="categories" checked></div>
+                        <div class="meta-detail" id="categoriesDetail">
+                            <div class="control-row"><label>Position</label><select id="categoriesPosition" class="pos-select"></select></div>
+                            <div class="toggle-row"><label>Pill / badge style</label><input type="checkbox" id="categoriesPill"></div>
+                            <div class="pill-style" id="categoriesPillStyle" style="display:none;">
+                                <div class="control-row grid2"><div><label>Border (px)</label><input type="number" id="categoriesBorderWidth" value="0" min="0"></div><div><label>Radius (px)</label><input type="number" id="categoriesRadius" value="4" min="0"></div></div>
+                                <div class="color-row">
+                                    <div class="color-chip"><span class="color-label">Background</span><input type="color" id="categoriesBg" value="#f0f0f0"></div>
+                                    <div class="color-chip"><span class="color-label">Border Color</span><input type="color" id="categoriesBorderColor" value="#cccccc"></div>
+                                </div>
+                            </div>
+                            <div class="toggle-row"><label>Link Categories</label><input type="checkbox" id="metadataCategoryLinks"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="meta-block">
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Tags</label><input type="checkbox" id="tags" checked></div>
+                        <div class="meta-detail" id="tagsDetail">
+                            <div class="control-row"><label>Position</label><select id="tagsPosition" class="pos-select"></select></div>
+                            <div class="toggle-row"><label>Pill / badge style</label><input type="checkbox" id="tagsPill"></div>
+                            <div class="pill-style" id="tagsPillStyle" style="display:none;">
+                                <div class="control-row grid2"><div><label>Border (px)</label><input type="number" id="tagsBorderWidth" value="0" min="0"></div><div><label>Radius (px)</label><input type="number" id="tagsRadius" value="4" min="0"></div></div>
+                                <div class="color-row">
+                                    <div class="color-chip"><span class="color-label">Background</span><input type="color" id="tagsBg" value="#f0f0f0"></div>
+                                    <div class="color-chip"><span class="color-label">Border Color</span><input type="color" id="tagsBorderColor" value="#cccccc"></div>
+                                </div>
+                            </div>
+                            <div class="toggle-row"><label>Link Tags</label><input type="checkbox" id="metadataTagLinks"></div>
+                        </div>
+                    </div>
+
+                    <!-- Event Dates -->
+                    <div class="meta-block">
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Event Dates <span style="font-weight:400;color:var(--text-tertiary)">(Events)</span></label><input type="checkbox" id="eventDates" checked></div>
+                        <div class="meta-detail" id="eventDatesDetail">
+                            <div class="control-row"><label>Position</label><select id="eventDatesPosition" class="pos-select"></select></div>
+                            <div class="toggle-row"><label>Pill / badge style</label><input type="checkbox" id="eventDatesPill"></div>
+                            <div class="pill-style" id="eventDatesPillStyle" style="display:none;">
+                                <div class="control-row grid2"><div><label>Border (px)</label><input type="number" id="eventDatesBorderWidth" value="0" min="0"></div><div><label>Radius (px)</label><input type="number" id="eventDatesRadius" value="4" min="0"></div></div>
+                                <div class="color-row">
+                                    <div class="color-chip"><span class="color-label">Background</span><input type="color" id="eventDatesBg" value="#f0f0f0"></div>
+                                    <div class="color-chip"><span class="color-label">Border Color</span><input type="color" id="eventDatesBorderColor" value="#cccccc"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Published Date -->
+                    <div class="meta-block">
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Published Date</label><input type="checkbox" id="date"></div>
+                        <div class="meta-detail" id="dateDetail">
+                            <div class="control-row"><label>Position</label><select id="datePosition" class="pos-select"></select></div>
+                        </div>
+                    </div>
+
+                    <!-- Author -->
+                    <div class="meta-block">
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Author <span style="font-weight:400;color:var(--text-tertiary)">(Blog)</span></label><input type="checkbox" id="author"></div>
+                        <div class="meta-detail" id="authorDetail">
+                            <div class="control-row"><label>Position</label><select id="authorPosition" class="pos-select"></select></div>
+                        </div>
+                    </div>
+
+                    <div class="control-row grid3" style="margin-top:6px;">
                         <div><label>Meta delim</label><input type="text" id="metadataDelimiter" value="|"></div>
                         <div><label>Cat delim</label><input type="text" id="categoriesDelimiter" value=", "></div>
                         <div><label>Tag delim</label><input type="text" id="tagsDelimiter" value=", "></div>
                     </div>
-                    <div class="toggle-row"><label>Link Categories</label><input type="checkbox" id="metadataCategoryLinks"></div>
-                    <div class="toggle-row"><label>Link Tags</label><input type="checkbox" id="metadataTagLinks"></div>
                 </div>
             </div>
 
@@ -631,14 +707,24 @@
           navigation: true, navigationLayout: "overlay",
           pagination: true, paginationType: "bullets", dynamicBullets: false, dynamicMainBullets: 8,
           effect: "", coverflowRotate: 50, coverflowScale: 0.85, coverflowSlideShadows: false,
-          freeMode: false, mousewheel: false,
+          freeMode: false, mousewheel: false, scrollbar: false,
           thumbnail: true, title: true, excerpt: true, price: true, eventDates: true,
-          categories: true, tags: true, clickthrough: true, newWindow: false,
-          metadataAboveTitle: "", metadataBelowTitle: "", metadataBelowExcerpt: "",
+          categories: true, tags: true, date: false, author: false,
+          categoriesPosition: "below-title", tagsPosition: "below-excerpt", eventDatesPosition: "below-title",
+          datePosition: "above-title", authorPosition: "above-title",
+          clickthrough: true, newWindow: false,
           metadataDelimiter: "|", categoriesDelimiter: ", ", tagsDelimiter: ", ",
           metadataCategoryLinks: false, metadataTagLinks: false,
           cacheDuration: 0, sdlPopups: false
         };
+        const POSITIONS = [
+          ["above-title", "Above title"],
+          ["below-title", "Below title"],
+          ["below-excerpt", "Below excerpt"],
+          ["overlay-top-left", "Overlay — top left"],
+          ["overlay-top-right", "Overlay — top right"],
+          ["none", "Hidden"],
+        ];
 
         const val = id => document.getElementById(id).value;
         const num = id => parseFloat(document.getElementById(id).value) || 0;
@@ -675,25 +761,18 @@
         let autoplayTimer = null;
         const host = document.getElementById("previewFrame");
 
-        function metaField(name, item) {
-          name = name.trim().toLowerCase();
-          if (!name) return null;
-          if (name === "publisheddate" || name === "publishdate" || name === "date")
-            return `<div class="published-on metadata"><p>${item.date}</p></div>`;
-          if (name === "author") return `<div class="author metadata"><p>${item.author}</p></div>`;
+        function metaNode(name, item, cfg) {
           if (name === "categories")
-            return `<div class="categories metadata"><ul>${item.categories.map(c=>`<li><span class="category" rel="category">${c}</span></li>`).join(" ")}</ul></div>`;
+            return `<div class="categories metadata meta-item meta-categories"><ul>${item.categories.map(c=>`<li><span class="category" rel="category">${cfg.metadataCategoryLinks?`<a href="#">${c}</a>`:c}</span></li>`).join(" ")}</ul></div>`;
           if (name === "tags")
-            return `<div class="tags metadata"><ul>${item.tags.map(t=>`<li><span class="tag" rel="tag">${t}</span></li>`).join(" ")}</ul></div>`;
-          return null;
-        }
-        function metaGroup(csv, item, cls, delim) {
-          const fields = (csv || "").split(",").map(s=>s.trim()).filter(Boolean);
-          if (!fields.length) return "";
-          const parts = fields.map(f => metaField(f, item)).filter(Boolean);
-          if (!parts.length) return "";
-          const joined = parts.join(`<span class="metadata-delimiter metadata">${delim}</span>`);
-          return `<div class="${cls} metadata-group">${joined}</div>`;
+            return `<div class="tags metadata meta-item meta-tags"><ul>${item.tags.map(t=>`<li><span class="tag" rel="tag">${cfg.metadataTagLinks?`<a href="#">${t}</a>`:t}</span></li>`).join(" ")}</ul></div>`;
+          if (name === "eventDates")
+            return `<div class="content-event-dates meta-item meta-event-dates"><p class="event-dates">${item.date} · 7:00 PM</p></div>`;
+          if (name === "date")
+            return `<div class="published-on metadata meta-item meta-date"><p>${item.date}</p></div>`;
+          if (name === "author")
+            return `<div class="author metadata meta-item meta-author"><p>${item.author}</p></div>`;
+          return "";
         }
 
         function render() {
@@ -710,21 +789,37 @@
           const items = buildMock(type, Math.min(cfg.limit, 12));
 
           const slidesHTML = items.map(item => {
+            // Bucket meta elements by position (mirrors carousel.js buildStructure)
+            const buckets = { "above-title": [], "below-title": [], "below-excerpt": [], "overlay-top-left": [], "overlay-top-right": [] };
+            const place = (enabled, name, pos) => {
+              if (!enabled || !pos || pos === "none" || !buckets[pos]) return;
+              if (pos.startsWith("overlay") && !cfg.thumbnail) return;
+              buckets[pos].push(metaNode(name, item, cfg));
+            };
+            place(cfg.categories, "categories", cfg.categoriesPosition);
+            place(cfg.tags, "tags", cfg.tagsPosition);
+            place(cfg.eventDates && type === "event", "eventDates", cfg.eventDatesPosition);
+            place(cfg.date, "date", cfg.datePosition);
+            place(cfg.author, "author", cfg.authorPosition);
+
+            const grp = (arr, cls) => arr.length ? `<div class="${cls} metadata-group">${arr.join(`<span class="metadata-delimiter metadata">${cfg.metadataDelimiter}</span>`)}</div>` : "";
+            const ov = (arr, cls) => arr.length ? `<div class="metadata-overlay ${cls}">${arr.join("")}</div>` : "";
+            const above = grp(buckets["above-title"], "content-metadata-above-title");
+            const belowT = grp(buckets["below-title"], "content-metadata-below-title");
+            const belowE = grp(buckets["below-excerpt"], "content-metadata-below-excerpt");
+            const overlays = ov(buckets["overlay-top-left"], "metadata-overlay-top-left") + ov(buckets["overlay-top-right"], "metadata-overlay-top-right");
+
             let thumb = "";
             if (cfg.thumbnail) {
               const img = `<img src="${item.img}" alt="${item.title}" style="object-fit:cover">`;
-              thumb = `<div class="slide-thumbnail">${img}${cfg.clickthrough ? '<a class="slide-thumbnail-link" href="#"></a>' : ""}</div>`;
+              thumb = `<div class="slide-thumbnail">${img}${cfg.clickthrough ? '<a class="slide-thumbnail-link" href="#"></a>' : ""}${overlays}</div>`;
             }
             const titleHTML = cfg.title ? `<div class="content-title"><h3>${cfg.clickthrough ? `<a href="#">${item.title}</a>` : item.title}</h3></div>` : "";
             const excerptHTML = (cfg.excerpt) ? `<div class="content-excerpt">${item.excerpt}</div>` : "";
             const priceHTML = (cfg.price && type === "products") ? `<div class="content-price"><p class="price">${item.price}</p></div>` : "";
-            const datesHTML = (cfg.eventDates && type === "event") ? `<div class="content-event-dates"><p class="event-dates">${item.date} · 7:00 PM</p></div>` : "";
-            const above = metaGroup(cfg.metadataAboveTitle, item, "content-metadata-above-title", cfg.metadataDelimiter);
-            const belowT = metaGroup(cfg.metadataBelowTitle, item, "content-metadata-below-title", cfg.metadataDelimiter);
-            const belowE = metaGroup(cfg.metadataBelowExcerpt, item, "content-metadata-below-excerpt", cfg.metadataDelimiter);
 
-            const order = ["metadataAboveTitle","title","metadataBelowTitle","price","eventDates","excerpt","metadataBelowExcerpt"];
-            const pieces = { metadataAboveTitle: above, title: titleHTML, metadataBelowTitle: belowT, price: priceHTML, eventDates: datesHTML, excerpt: excerptHTML, metadataBelowExcerpt: belowE };
+            const order = ["metadataAboveTitle","title","metadataBelowTitle","price","excerpt","metadataBelowExcerpt"];
+            const pieces = { metadataAboveTitle: above, title: titleHTML, metadataBelowTitle: belowT, price: priceHTML, excerpt: excerptHTML, metadataBelowExcerpt: belowE };
             const content = `<div class="slide-content">${order.map(k=>pieces[k]||"").join("")}</div>`;
             return `<div class="swiper-slide collection-carousel-slide">${thumb}${content}</div>`;
           }).join("");
@@ -739,11 +834,13 @@
             </div>`;
           }
           let pagHTML = cfg.pagination ? `<div class="collection-carousel-pagination"><div class="pagination-wrapper"></div></div>` : "";
+          let scrollbarHTML = cfg.scrollbar ? `<div class="collection-carousel-scrollbar"><div class="swiper-scrollbar-drag"></div></div>` : "";
 
           host.innerHTML = `<div id="previewHost" data-sdl-plugin="collection-carousel" data-navigation-layout="${cfg.navigation ? cfg.navigationLayout : ''}">
             ${navHTML}
             <div class="swiper collection-carousel"><div class="swiper-wrapper">${slidesHTML}</div></div>
             ${pagHTML}
+            ${scrollbarHTML}
           </div>`;
 
           const root = document.getElementById("previewHost");
@@ -808,10 +905,68 @@
             };
           }
 
+          // scrollbar: reflect scroll position + draggable handle
+          const sb = root.querySelector(".collection-carousel-scrollbar");
+          if (sb) {
+            const drag = sb.querySelector(".swiper-scrollbar-drag");
+            const maxScroll = () => Math.max(1, wrapper.scrollWidth - wrapper.clientWidth);
+            const ratio = () => Math.min(1, wrapper.clientWidth / wrapper.scrollWidth);
+            const sync = () => {
+              const w = ratio() * 100;
+              drag.style.width = w + "%";
+              const avail = sb.clientWidth - drag.clientWidth;
+              drag.style.transform = `translateX(${(wrapper.scrollLeft / maxScroll()) * avail}px)`;
+            };
+            sync();
+            wrapper.addEventListener("scroll", sync);
+            if (cfg.scrollbarDraggable) {
+              let dragging = false;
+              const onMove = e => {
+                if (!dragging) return;
+                const rect = sb.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const pct = Math.min(1, Math.max(0, x / rect.width));
+                wrapper.scrollLeft = pct * maxScroll();
+              };
+              const start = e => { dragging = true; onMove(e); e.preventDefault(); };
+              const stop = () => { dragging = false; };
+              sb.addEventListener("mousedown", start);
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", stop);
+              sb.addEventListener("touchstart", start, { passive: false });
+              window.addEventListener("touchmove", onMove, { passive: false });
+              window.addEventListener("touchend", stop);
+            }
+          }
+
           if (cfg.autoplay > 0) {
             let delay = cfg.autoplay; if (delay < 10) delay *= 1000; delay = Math.max(500, delay);
             autoplayTimer = setInterval(slideNext, delay);
           }
+        }
+
+        // Shared meta/scrollbar CSS-var entries (used by preview + code-gen)
+        function metaStyleEntries(c) {
+          const e = [];
+          const pill = (on, prefix, bg, bw, bc, r) => {
+            if (!on) return;
+            e.push([`--sdl-cc-${prefix}-background-color`, bg]);
+            e.push([`--sdl-cc-${prefix}-border-width`, bw + "px"]);
+            e.push([`--sdl-cc-${prefix}-border-style`, "solid"]);
+            e.push([`--sdl-cc-${prefix}-border-color`, bc]);
+            e.push([`--sdl-cc-${prefix}-border-radius`, r + "px"]);
+            e.push([`--sdl-cc-${prefix}-padding`, "3px 8px"]);
+          };
+          pill(c.categoriesPill, "category", c.categoriesBg, c.categoriesBorderWidth, c.categoriesBorderColor, c.categoriesRadius);
+          pill(c.tagsPill, "tag", c.tagsBg, c.tagsBorderWidth, c.tagsBorderColor, c.tagsRadius);
+          pill(c.eventDatesPill, "event-dates", c.eventDatesBg, c.eventDatesBorderWidth, c.eventDatesBorderColor, c.eventDatesRadius);
+          if (c.scrollbar) {
+            if (c.scrollbarTrackColor !== "#e7e7e7") e.push(["--sdl-cc-scrollbar-track-color", c.scrollbarTrackColor]);
+            if (c.scrollbarDragColor !== "#222222") e.push(["--sdl-cc-scrollbar-drag-color", c.scrollbarDragColor]);
+            if (c.scrollbarSize !== 4) e.push(["--sdl-cc-scrollbar-size", c.scrollbarSize + "px"]);
+            if (c.scrollbarRadius !== 10) e.push(["--sdl-cc-scrollbar-radius", c.scrollbarRadius + "px"]);
+          }
+          return e;
         }
 
         function applyStyleVars(root, cfg) {
@@ -827,6 +982,25 @@
           set("--sdl-cc-inactive-bullet-color", cfg.activeBullet);
           set("--sdl-cc-title-color", cfg.titleColor);
           set("--sdl-cc-excerpt-color", cfg.excerptColor);
+          // scrollbar uses its own defaults; only override when scrollbar is on
+          if (cfg.scrollbar) {
+            set("--sdl-cc-scrollbar-track-color", cfg.scrollbarTrackColor);
+            set("--sdl-cc-scrollbar-drag-color", cfg.scrollbarDragColor);
+            set("--sdl-cc-scrollbar-size", cfg.scrollbarSize + "px");
+            set("--sdl-cc-scrollbar-radius", cfg.scrollbarRadius + "px");
+          }
+          // pill styling for categories / tags / event dates
+          const pill = (on, prefix, bg, bw, bc, r) => {
+            if (!on) return;
+            set(`--sdl-cc-${prefix}-background-color`, bg);
+            set(`--sdl-cc-${prefix}-border-width`, bw + "px");
+            set(`--sdl-cc-${prefix}-border-color`, bc);
+            set(`--sdl-cc-${prefix}-border-radius`, r + "px");
+            set(`--sdl-cc-${prefix}-padding`, "3px 8px");
+          };
+          pill(cfg.categoriesPill, "category", cfg.categoriesBg, cfg.categoriesBorderWidth, cfg.categoriesBorderColor, cfg.categoriesRadius);
+          pill(cfg.tagsPill, "tag", cfg.tagsBg, cfg.tagsBorderWidth, cfg.tagsBorderColor, cfg.tagsRadius);
+          pill(cfg.eventDatesPill, "event-dates", cfg.eventDatesBg, cfg.eventDatesBorderWidth, cfg.eventDatesBorderColor, cfg.eventDatesRadius);
         }
 
         /* ----------------------------- read config -------------------------- */
@@ -850,10 +1024,18 @@
             dynamicBullets: chk("dynamicBullets"), dynamicMainBullets: num("dynamicMainBullets"),
             effect: val("effect"), coverflowRotate: num("coverflowRotate"), coverflowScale: num("coverflowScale"), coverflowSlideShadows: chk("coverflowSlideShadows"),
             freeMode: chk("freeMode"), mousewheel: chk("mousewheel"),
+            scrollbar: chk("scrollbar"), scrollbarDraggable: chk("scrollbarDraggable"),
+            scrollbarTrackColor: val("scrollbarTrackColor"), scrollbarDragColor: val("scrollbarDragColor"),
+            scrollbarSize: num("scrollbarSize"), scrollbarRadius: num("scrollbarRadius"),
             thumbnail: chk("thumbnail"), title: chk("title"), excerpt: chk("excerpt"), price: chk("price"),
             eventDates: chk("eventDates"), categories: chk("categories"), tags: chk("tags"),
+            date: chk("date"), author: chk("author"),
+            categoriesPosition: val("categoriesPosition"), tagsPosition: val("tagsPosition"), eventDatesPosition: val("eventDatesPosition"),
+            datePosition: val("datePosition"), authorPosition: val("authorPosition"),
+            categoriesPill: chk("categoriesPill"), categoriesBg: val("categoriesBg"), categoriesBorderWidth: num("categoriesBorderWidth"), categoriesBorderColor: val("categoriesBorderColor"), categoriesRadius: num("categoriesRadius"),
+            tagsPill: chk("tagsPill"), tagsBg: val("tagsBg"), tagsBorderWidth: num("tagsBorderWidth"), tagsBorderColor: val("tagsBorderColor"), tagsRadius: num("tagsRadius"),
+            eventDatesPill: chk("eventDatesPill"), eventDatesBg: val("eventDatesBg"), eventDatesBorderWidth: num("eventDatesBorderWidth"), eventDatesBorderColor: val("eventDatesBorderColor"), eventDatesRadius: num("eventDatesRadius"),
             clickthrough: chk("clickthrough"), newWindow: chk("newWindow"),
-            metadataAboveTitle: val("metadataAboveTitle"), metadataBelowTitle: val("metadataBelowTitle"), metadataBelowExcerpt: val("metadataBelowExcerpt"),
             metadataDelimiter: val("metadataDelimiter"), categoriesDelimiter: val("categoriesDelimiter"), tagsDelimiter: val("tagsDelimiter"),
             metadataCategoryLinks: chk("metadataCategoryLinks"), metadataTagLinks: chk("metadataTagLinks"),
             cacheDuration: num("cacheDuration"), sdlPopups: chk("sdlPopups"),
@@ -910,20 +1092,28 @@
 
           add(c.freeMode, "free-mode", "true");
           add(c.mousewheel && !c.freeMode, "mousewheel", "true");
+          add(c.scrollbar, "scrollbar", "true");
+          add(c.scrollbar && !c.scrollbarDraggable, "scrollbar-draggable", "false");
 
           add(!c.thumbnail, "thumbnail", "false");
           add(!c.title, "title", "false");
           add(!c.excerpt, "excerpt", "false");
           add(!c.price, "price", "false");
-          add(!c.eventDates, "event-dates", "false");
-          add(!c.categories, "categories", "false");
-          add(!c.tags, "tags", "false");
           add(!c.clickthrough, "clickthrough", "false");
           add(c.newWindow, "new-window", "true");
 
-          add(!!c.metadataAboveTitle.trim(), "metadata-above-title", c.metadataAboveTitle);
-          add(!!c.metadataBelowTitle.trim(), "metadata-below-title", c.metadataBelowTitle);
-          add(!!c.metadataBelowExcerpt.trim(), "metadata-below-excerpt", c.metadataBelowExcerpt);
+          // Meta elements: toggles + positions
+          add(!c.categories, "categories", "false");
+          add(c.categories && c.categoriesPosition !== DEFAULTS.categoriesPosition, "categories-position", c.categoriesPosition);
+          add(!c.tags, "tags", "false");
+          add(c.tags && c.tagsPosition !== DEFAULTS.tagsPosition, "tags-position", c.tagsPosition);
+          add(!c.eventDates, "event-dates", "false");
+          add(c.eventDates && c.eventDatesPosition !== DEFAULTS.eventDatesPosition, "event-dates-position", c.eventDatesPosition);
+          add(c.date, "date", "true");
+          add(c.date && c.datePosition !== DEFAULTS.datePosition, "date-position", c.datePosition);
+          add(c.author, "author", "true");
+          add(c.author && c.authorPosition !== DEFAULTS.authorPosition, "author-position", c.authorPosition);
+
           add(c.metadataDelimiter !== DEFAULTS.metadataDelimiter, "metadata-delimiter", c.metadataDelimiter);
           add(c.categoriesDelimiter !== DEFAULTS.categoriesDelimiter, "categories-delimiter", c.categoriesDelimiter);
           add(c.tagsDelimiter !== DEFAULTS.tagsDelimiter, "tags-delimiter", c.tagsDelimiter);
@@ -944,6 +1134,7 @@
           if (c.activeBullet !== "#222222") { vars.push(`  --sdl-cc-active-bullet-color: ${c.activeBullet};`); vars.push(`  --sdl-cc-inactive-bullet-color: ${c.activeBullet};`); }
           if (c.titleColor !== "#1a1a1a") vars.push(`  --sdl-cc-title-color: ${c.titleColor};`);
           if (c.excerptColor !== "#666666") vars.push(`  --sdl-cc-excerpt-color: ${c.excerptColor};`);
+          metaStyleEntries(c).forEach(([k, v]) => vars.push(`  ${k}: ${v};`));
 
           const styleBlock = vars.length ? `<style>\n#${c.elId} {\n${vars.join("\n")}\n}\n</style>\n` : "";
 
@@ -972,6 +1163,16 @@ ${styleBlock}<div id="${c.elId}"
           }).join("\n");
         }
 
+        /* ------------------------- position selects ------------------------- */
+        function initPositionSelects() {
+          const defaults = { categoriesPosition: "below-title", tagsPosition: "below-excerpt", eventDatesPosition: "below-title", datePosition: "above-title", authorPosition: "above-title" };
+          Object.keys(defaults).forEach(id => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = POSITIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+            sel.value = defaults[id];
+          });
+        }
+
         /* ----------------------------- conditional rows --------------------- */
         function syncRows() {
           document.getElementById("eventsRow").style.display = val("collectionType") === "event" ? "block" : "none";
@@ -979,6 +1180,19 @@ ${styleBlock}<div id="${c.elId}"
           document.getElementById("dynBulletsRow").style.display = (chk("pagination") && val("paginationType") === "bullets") ? "flex" : "none";
           document.getElementById("dynMainRow").style.display = (chk("pagination") && val("paginationType") === "bullets" && chk("dynamicBullets")) ? "block" : "none";
           document.getElementById("coverflowOpts").style.display = val("effect") === "coverflow" ? "block" : "none";
+
+          // meta element details + pill style blocks
+          [["categories", "categoriesDetail"], ["tags", "tagsDetail"], ["eventDates", "eventDatesDetail"], ["date", "dateDetail"], ["author", "authorDetail"]].forEach(([t, d]) => {
+            document.getElementById(d).style.display = chk(t) ? "block" : "none";
+          });
+          ["categories", "tags", "eventDates"].forEach(p => {
+            document.getElementById(p + "PillStyle").style.display = chk(p + "Pill") ? "block" : "none";
+          });
+
+          // scrollbar style rows
+          const sbOn = chk("scrollbar");
+          document.getElementById("scrollbarDragRow").style.display = sbOn ? "flex" : "none";
+          document.getElementById("scrollbarStyleRow").style.display = sbOn ? "flex" : "none";
         }
 
         /* ------------------------------- update ----------------------------- */
@@ -1014,6 +1228,7 @@ ${styleBlock}<div id="${c.elId}"
           });
         };
 
+        initPositionSelects();
         updateAll();
       } catch (err) {
         document.body.innerHTML = '<div style="padding:40px;font-family:monospace"><h1>Config error</h1><pre>' + err.message + "\n" + err.stack + "</pre></div>";

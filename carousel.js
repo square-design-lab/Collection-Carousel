@@ -36,6 +36,16 @@
       excerpt: true,
       categories: true,
       tags: true,
+      date: false,
+      author: false,
+      // First-class placement for each meta element. Allowed values:
+      // "above-title" | "below-title" | "below-excerpt" |
+      // "overlay-top-left" | "overlay-top-right" | "none"
+      categoriesPosition: "below-title",
+      tagsPosition: "below-excerpt",
+      eventDatesPosition: "below-title",
+      datePosition: "above-title",
+      authorPosition: "above-title",
       metadataAboveTitle: [],
       metadataBelowTitle: [],
       metadataBelowExcerpt: [],
@@ -75,6 +85,8 @@
       paginationType: "bullets",
       dynamicBullets: false,
       dynamicMainBullets: 8,
+      scrollbar: false,
+      scrollbarDraggable: true,
       slidesPerViewSm: 1,
       slidesPerViesdld: 2,
       slidesPerViewLg: 4,
@@ -439,6 +451,14 @@
         type: settings.paginationType,
         dynamicBullets: settings.dynamicBullets,
         dynamicMainBullets: settings.dynamicMainBullets,
+      },
+      scrollbar: {
+        enabled: !!settings.scrollbar,
+        el: settings.scrollbar
+          ? `#${settings.id} .collection-carousel-scrollbar`
+          : null,
+        draggable: settings.scrollbarDraggable !== false,
+        hide: false,
       },
       breakpoints: {
         0: {
@@ -1062,8 +1082,7 @@
       const content = document.createElement("div");
       content.className = "slide-content";
 
-      let title, excerpt, price, eventDates;
-      let metadataAboveTitle, metadataBelowTitle, metadataBelowExcerpt;
+      let title, excerpt, price;
 
       if (settings.title) {
         title = document.createElement("div");
@@ -1091,63 +1110,98 @@
         price.append(builders.price(item));
       }
 
-      if (settings.eventDates && cc.type === "event") {
-        eventDates = builders.eventDates(item);
-        if (eventDates) eventDates.className = "content-event-dates";
-      }
-
       if (settings.excerpt && item.excerpt) {
         excerpt = document.createElement("div");
         excerpt.className = "content-excerpt";
         excerpt.innerHTML = item.excerpt;
       }
 
-      const buildMetadataGroup = (fields, className) => {
-        if (!fields || !fields.length) return null;
-        const group = document.createElement("div");
-        group.className = className;
-        let hasAddedElement = false;
-        fields.forEach(metadata => {
-          if (builders[metadata]) {
-            const element = builders[metadata](item);
-            if (element) {
-              if (hasAddedElement && settings.metadataDelimiter) {
-                const delimiter = document.createElement("span");
-                delimiter.className = "metadata-delimiter metadata";
-                delimiter.textContent = settings.metadataDelimiter;
-                group.appendChild(delimiter);
-              }
-              group.appendChild(element);
-              hasAddedElement = true;
+      /* --- Meta elements (categories, tags, dates, author) by position --- *
+       * Each element is bucketed into one of five positions. Three render
+       * in the content flow (via contentOrder); two render as overlays on
+       * the thumbnail image. */
+      const positions = {
+        "above-title": [],
+        "below-title": [],
+        "below-excerpt": [],
+        "overlay-top-left": [],
+        "overlay-top-right": [],
+      };
+      const placeMeta = (node, position, extraClass) => {
+        if (!node || !position || position === "none") return;
+        if (!positions[position]) return;
+        // Overlay positions require a thumbnail to sit on.
+        if (position.startsWith("overlay") && !(settings.thumbnail && imageContainer)) return;
+        node.classList.add("meta-item");
+        if (extraClass) node.classList.add(extraClass);
+        positions[position].push(node);
+      };
+
+      if (settings.categories) placeMeta(builders.categories(item), settings.categoriesPosition, "meta-categories");
+      if (settings.tags) placeMeta(builders.tags(item), settings.tagsPosition, "meta-tags");
+      if (settings.eventDates && cc.type === "event") {
+        const ed = builders.eventDates(item);
+        if (ed) ed.classList.add("content-event-dates");
+        placeMeta(ed, settings.eventDatesPosition, "meta-event-dates");
+      }
+      if (settings.date) placeMeta(builders.publisheddate(item), settings.datePosition, "meta-date");
+      if (settings.author) placeMeta(builders.author(item), settings.authorPosition, "meta-author");
+
+      /* Legacy CSV metadata fields (data-metadata-above-title, etc.) still
+       * supported — appended to the matching in-flow bucket. */
+      const csvMap = {
+        "above-title": settings.metadataAboveTitle,
+        "below-title": settings.metadataBelowTitle,
+        "below-excerpt": settings.metadataBelowExcerpt,
+      };
+      Object.entries(csvMap).forEach(([pos, fields]) => {
+        (fields || []).forEach(name => {
+          if (builders[name]) {
+            const n = builders[name](item);
+            if (n) {
+              n.classList.add("meta-item");
+              positions[pos].push(n);
             }
           }
         });
-        return hasAddedElement ? group : null;
+      });
+
+      const makeGroup = (nodes, className, withDelimiters) => {
+        if (!nodes.length) return null;
+        const group = document.createElement("div");
+        group.className = className;
+        nodes.forEach((node, i) => {
+          if (withDelimiters && i > 0 && settings.metadataDelimiter) {
+            const d = document.createElement("span");
+            d.className = "metadata-delimiter metadata";
+            d.textContent = settings.metadataDelimiter;
+            group.appendChild(d);
+          }
+          group.appendChild(node);
+        });
+        return group;
       };
 
-      metadataAboveTitle = buildMetadataGroup(
-        settings.metadataAboveTitle,
-        "content-metadata-above-title metadata-group"
-      );
-      metadataBelowTitle = buildMetadataGroup(
-        settings.metadataBelowTitle,
-        "content-metadata-below-title metadata-group"
-      );
-      metadataBelowExcerpt = buildMetadataGroup(
-        settings.metadataBelowExcerpt,
-        "content-metadata-below-excerpt metadata-group"
-      );
+      const aboveTitle = makeGroup(positions["above-title"], "content-metadata-above-title metadata-group", true);
+      const belowTitle = makeGroup(positions["below-title"], "content-metadata-below-title metadata-group", true);
+      const belowExcerpt = makeGroup(positions["below-excerpt"], "content-metadata-below-excerpt metadata-group", true);
+      const overlayTL = makeGroup(positions["overlay-top-left"], "metadata-overlay metadata-overlay-top-left", false);
+      const overlayTR = makeGroup(positions["overlay-top-right"], "metadata-overlay metadata-overlay-top-right", false);
+
+      if (imageContainer) {
+        if (overlayTL) imageContainer.appendChild(overlayTL);
+        if (overlayTR) imageContainer.appendChild(overlayTR);
+      }
 
       if (settings.thumbnail && imageContainer) slide.appendChild(imageContainer);
 
       settings.contentOrder.forEach(contentPiece => {
         if (contentPiece === "title" && title) content.appendChild(title);
         if (contentPiece === "price" && price) content.appendChild(price);
-        if (contentPiece === "eventDates" && eventDates) content.appendChild(eventDates);
         if (contentPiece === "excerpt" && excerpt) content.appendChild(excerpt);
-        if (contentPiece === "metadataAboveTitle" && metadataAboveTitle) content.appendChild(metadataAboveTitle);
-        if (contentPiece === "metadataBelowTitle" && metadataBelowTitle) content.appendChild(metadataBelowTitle);
-        if (contentPiece === "metadataBelowExcerpt" && metadataBelowExcerpt) content.appendChild(metadataBelowExcerpt);
+        if (contentPiece === "metadataAboveTitle" && aboveTitle) content.appendChild(aboveTitle);
+        if (contentPiece === "metadataBelowTitle" && belowTitle) content.appendChild(belowTitle);
+        if (contentPiece === "metadataBelowExcerpt" && belowExcerpt) content.appendChild(belowExcerpt);
       });
 
       slide.appendChild(content);
@@ -1201,6 +1255,13 @@
       paginationWrapper.className = "pagination-wrapper";
       pagination.appendChild(paginationWrapper);
       cc.el.appendChild(pagination);
+    }
+
+    if (settings.scrollbar) {
+      const scrollbar = document.createElement("div");
+      cc.scrollbar = scrollbar;
+      scrollbar.className = "collection-carousel-scrollbar";
+      cc.el.appendChild(scrollbar);
     }
 
     if (settings.navigationLayout.includes("bottom") && settings.pagination) {

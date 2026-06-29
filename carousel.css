@@ -1003,6 +1003,13 @@ html:has([data-sdl-plugin="collection-carousel"]) {
     var(--paragraph-font-size, 1rem)
   );
   color: var(--sdl-cc-event-dates-color, var(--paragraphMediumColor));
+  display: inline-block;
+  background-color: var(--sdl-cc-event-dates-background-color, transparent);
+  border-radius: var(--sdl-cc-event-dates-border-radius, 0);
+  border-width: var(--sdl-cc-event-dates-border-width, 0);
+  border-style: var(--sdl-cc-event-dates-border-style, solid);
+  border-color: var(--sdl-cc-event-dates-border-color, transparent);
+  padding: var(--sdl-cc-event-dates-padding, 0);
 }
 
 /*Excerpt*/
@@ -1034,6 +1041,55 @@ html:has([data-sdl-plugin="collection-carousel"]) {
   flex-wrap: wrap;
   align-items: center;
   gap: 0 var(--metadata-gap, 8px);
+}
+
+/* Overlay metadata (sits over the thumbnail image) */
+[data-sdl-plugin="collection-carousel"] .metadata-overlay {
+  position: absolute;
+  top: var(--sdl-cc-overlay-offset, 12px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sdl-cc-overlay-gap, 6px);
+  max-width: calc(100% - 24px);
+  pointer-events: none;
+}
+[data-sdl-plugin="collection-carousel"] .metadata-overlay > * {
+  pointer-events: auto;
+  margin: 0;
+}
+[data-sdl-plugin="collection-carousel"] .metadata-overlay-top-left {
+  left: var(--sdl-cc-overlay-offset, 12px);
+  align-items: flex-start;
+}
+[data-sdl-plugin="collection-carousel"] .metadata-overlay-top-right {
+  right: var(--sdl-cc-overlay-offset, 12px);
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* Draggable scrollbar (off by default) */
+[data-sdl-plugin="collection-carousel"] .collection-carousel-scrollbar {
+  position: relative;
+  height: var(--sdl-cc-scrollbar-size, 4px);
+  width: var(--sdl-cc-scrollbar-width, 100%);
+  max-width: var(--sdl-cc-scrollbar-max-width, 100%);
+  margin: var(--sdl-cc-scrollbar-top-padding, 20px) auto 0;
+  background: var(--sdl-cc-scrollbar-track-color, rgba(0, 0, 0, 0.1));
+  border-radius: var(--sdl-cc-scrollbar-radius, 10px);
+  cursor: pointer;
+}
+[data-sdl-plugin="collection-carousel"]
+  .collection-carousel-scrollbar
+  .swiper-scrollbar-drag {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  background: var(--sdl-cc-scrollbar-drag-color, rgba(0, 0, 0, 0.45));
+  border-radius: var(--sdl-cc-scrollbar-radius, 10px);
+  cursor: grab;
 }
 
 /*Categories & Tags*/
