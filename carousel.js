@@ -25,6 +25,8 @@
       speed: 300,
       limit: 20,
       featured: false,
+      filterCategory: "", // show only items in this category (one at a time)
+      filterTag: "", // show only items with this tag (one at a time)
       cacheCollections: false,
       cacheDuration: 0, // minutes
       clickthrough: true,
@@ -91,6 +93,8 @@
       pagination: true,
       paginationType: "bullets", // "bullets" | "fraction" | "bullets-fraction"
       paginationPosition: "bottom-center", // bottom-center | bottom-left | bottom-right
+      bulletsPosition: "bottom-center", // used by "bullets-fraction"
+      fractionPosition: "bottom-right", // used by "bullets-fraction"
       dynamicBullets: false,
       dynamicMainBullets: 8,
       scrollbar: false,
@@ -101,9 +105,9 @@
       slidesPerGroupSm: 1,
       slidesPerGroupMd: 1,
       slidesPerGroupLg: 1,
-      spaceBetweenSm: 17,
-      spaceBetweenMd: 34,
-      spaceBetweenLg: 54,
+      spaceBetweenSm: 16,
+      spaceBetweenMd: 20,
+      spaceBetweenLg: 20,
       events: "all", // upcoming, past
       effect: null,
       coverflowRotate: 0,
@@ -416,6 +420,9 @@
       slidesOffsetBefore: 0,
       loop: settings.autoplay && settings.autoplayMode === "continuous" ? true : settings.loop,
       centeredSlides: settings.centeredSlides,
+      // Round slide/offset lengths to whole pixels so the last visible slide
+      // isn't clipped by sub-pixel overflow (e.g. 3-per-view, no loop).
+      roundLengths: true,
       touchEventsTarget: "container",
       effect: settings.effect,
       speed: settings.speed,
@@ -949,6 +956,24 @@
           currentItems = currentItems.filter(item => item.starred);
         }
 
+        // Filter by a single category OR tag (case-insensitive). Applied per
+        // page so pagination keeps fetching until `limit` matches are found.
+        const filterCat = (cc.settings.filterCategory || "").trim().toLowerCase();
+        const filterTag = (cc.settings.filterTag || "").trim().toLowerCase();
+        if (filterCat) {
+          currentItems = currentItems.filter(item => {
+            const cats = [
+              ...(item.categories || []),
+              ...((item.categoriesFull || []).map(c => c.displayName)),
+            ].map(c => String(c).toLowerCase());
+            return cats.includes(filterCat);
+          });
+        } else if (filterTag) {
+          currentItems = currentItems.filter(item =>
+            (item.tags || []).map(t => String(t).toLowerCase()).includes(filterTag)
+          );
+        }
+
         items.push(...currentItems);
 
         if (items.length >= limit) {
@@ -1320,16 +1345,23 @@
     if (settings.pagination) {
       const pagination = document.createElement("div");
       cc.pagination = pagination;
-      pagination.className = `collection-carousel-pagination pagination-pos-${settings.paginationPosition || "bottom-center"}`;
+      const isSplit = settings.paginationType === "bullets-fraction";
+      const posClass = (p) => `pos-${(p || "bottom-center").replace("bottom-", "")}`;
       const paginationWrapper = document.createElement("div");
       paginationWrapper.className = "pagination-wrapper";
-      pagination.appendChild(paginationWrapper);
-      // "bullets-fraction" adds a separate fraction element next to the bullets.
-      if (settings.paginationType === "bullets-fraction") {
+
+      if (isSplit) {
+        // Bullets + fraction can be positioned independently.
+        pagination.className = "collection-carousel-pagination pagination-split";
+        paginationWrapper.classList.add(posClass(settings.bulletsPosition));
+        pagination.appendChild(paginationWrapper);
         const fraction = document.createElement("div");
-        fraction.className = "pagination-fraction";
+        fraction.className = `pagination-fraction ${posClass(settings.fractionPosition)}`;
         fraction.innerHTML = `<span class="fraction-current">1</span><span class="fraction-divider"> / </span><span class="fraction-total">${cc.items.length}</span>`;
         pagination.appendChild(fraction);
+      } else {
+        pagination.className = `collection-carousel-pagination pagination-pos-${settings.paginationPosition || "bottom-center"}`;
+        pagination.appendChild(paginationWrapper);
       }
       cc.el.appendChild(pagination);
     }

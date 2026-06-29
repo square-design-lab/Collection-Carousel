@@ -338,15 +338,29 @@
                     <div class="control-row">
                         <label>Apply a Preset</label>
                         <select id="preset">
-                            <option value="">— Custom —</option>
-                            <option value="cards">Clean Cards (premium)</option>
+                            <option value="standard" selected>Standard — image top, content below</option>
+                            <option value="premium">Premium Cards (background, border, radius)</option>
                             <option value="marquee">Continuous Marquee</option>
                             <option value="overlay">Editorial Overlay</option>
                             <option value="sqsp-hero">Squarespace.com — Hero</option>
                             <option value="sqsp-features">Squarespace.com — Feature Cards</option>
                             <option value="sqsp-tools">Squarespace.com — Tool Cards</option>
                         </select>
-                        <div class="helper-text">Presets set a bundle of options as a starting point — tweak anything afterward.</div>
+                        <div class="helper-text">Each preset is a complete starting layout — tweak anything afterward.</div>
+                    </div>
+                    <div class="control-row" id="overlayVariantRow" style="display:none;">
+                        <label>Overlay Style</label>
+                        <select id="overlayVariant">
+                            <option value="overlay-bottom" selected>Overlay — content bottom</option>
+                            <option value="overlay-top">Overlay — content top + button bottom</option>
+                        </select>
+                    </div>
+                    <div class="pill-style" id="premiumStyleRow" style="display:none;">
+                        <div class="control-row grid2"><div><label>Card Border (px)</label><input type="number" id="cardBorderWidth" value="1" min="0"></div><div><label>Card Radius (px)</label><input type="number" id="cardRadius" value="14" min="0"></div></div>
+                        <div class="color-row">
+                            <div class="color-chip"><span class="color-label">Card Background</span><input type="color" id="cardBg" value="#ffffff"></div>
+                            <div class="color-chip"><span class="color-label">Border Color</span><input type="color" id="cardBorderColor" value="#e8e8e8"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -379,6 +393,19 @@
                         <input type="number" id="limit" value="20" min="1">
                     </div>
                     <div class="toggle-row"><label>Featured / Starred Only</label><input type="checkbox" id="featured"></div>
+                    <div class="control-row">
+                        <label>Filter By Category / Tag</label>
+                        <select id="filterType">
+                            <option value="">No filter</option>
+                            <option value="category">Category</option>
+                            <option value="tag">Tag</option>
+                        </select>
+                    </div>
+                    <div class="control-row" id="filterValueRow" style="display:none;">
+                        <label id="filterValueLabel">Category name</label>
+                        <input type="text" id="filterValue" placeholder="e.g. News">
+                        <div class="helper-text">Shows only items matching this name (case-insensitive). Works for blog, store &amp; events. Pick category OR tag — not both.</div>
+                    </div>
                     <div class="control-row" id="eventsRow" style="display:none;">
                         <label>Events Filter</label>
                         <select id="events">
@@ -402,9 +429,9 @@
                     </div>
                     <label>Space Between (px)</label>
                     <div class="control-row grid3">
-                        <div><label>Mobile</label><input type="number" id="sbSm" value="17"></div>
-                        <div><label>Tablet</label><input type="number" id="sbMd" value="34"></div>
-                        <div><label>Desktop</label><input type="number" id="sbLg" value="54"></div>
+                        <div><label>Mobile</label><input type="number" id="sbSm" value="16"></div>
+                        <div><label>Tablet</label><input type="number" id="sbMd" value="20"></div>
+                        <div><label>Desktop</label><input type="number" id="sbLg" value="20"></div>
                     </div>
                     <div class="control-row">
                         <label>Thumbnail Aspect Ratio</label>
@@ -503,13 +530,29 @@
                             <option value="bullets-fraction">Bullets + Fraction</option>
                         </select>
                     </div>
-                    <div class="control-row">
+                    <div class="control-row" id="paginationPositionRow">
                         <label>Position</label>
                         <select id="paginationPosition">
                             <option value="bottom-center" selected>Bottom center</option>
                             <option value="bottom-left">Bottom left</option>
                             <option value="bottom-right">Bottom right</option>
                         </select>
+                    </div>
+                    <div class="grid2" id="splitPositionRow" style="display:none; margin-bottom:14px;">
+                        <div><label>Bullets Position</label>
+                            <select id="bulletsPosition">
+                                <option value="bottom-center">Bottom center</option>
+                                <option value="bottom-left" selected>Bottom left</option>
+                                <option value="bottom-right">Bottom right</option>
+                            </select>
+                        </div>
+                        <div><label>Fraction Position</label>
+                            <select id="fractionPosition">
+                                <option value="bottom-center">Bottom center</option>
+                                <option value="bottom-left">Bottom left</option>
+                                <option value="bottom-right" selected>Bottom right</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="toggle-row" id="dynBulletsRow"><label>Dynamic Bullets</label><input type="checkbox" id="dynamicBullets"></div>
                     <div class="control-row" id="dynMainRow" style="display:none;">
@@ -546,31 +589,6 @@
                 </div>
             </div>
 
-            <!-- CARD DESIGN -->
-            <div class="group">
-                <div class="group-header" onclick="togGroup(this)">Card Design</div>
-                <div class="group-body">
-                    <div class="control-row">
-                        <label>Card Layout</label>
-                        <select id="cardLayout">
-                            <option value="standard" selected>Standard (image top, content below)</option>
-                            <option value="premium">Premium card (background, border, radius)</option>
-                            <option value="overlay-bottom">Overlay — content bottom</option>
-                            <option value="overlay-top">Overlay — content top + button bottom</option>
-                            <option value="hero">Hero (full-bleed overlay)</option>
-                        </select>
-                    </div>
-                    <div class="pill-style" id="premiumOpts" style="display:none;">
-                        <div class="control-row grid2"><div><label>Border (px)</label><input type="number" id="cardBorderWidth" value="1" min="0"></div><div><label>Radius (px)</label><input type="number" id="cardRadius" value="14" min="0"></div></div>
-                        <div class="color-row">
-                            <div class="color-chip"><span class="color-label">Card Background</span><input type="color" id="cardBg" value="#ffffff"></div>
-                            <div class="color-chip"><span class="color-label">Border Color</span><input type="color" id="cardBorderColor" value="#e8e8e8"></div>
-                        </div>
-                    </div>
-                    <div class="helper-text" id="overlayHelp" style="display:none;">Overlay layouts place text over the image with a gradient scrim and light text. Best with categories/tags set to <b>below title</b> and an excerpt.</div>
-                </div>
-            </div>
-
             <!-- BUTTON -->
             <div class="group">
                 <div class="group-header" onclick="togGroup(this)">Button</div>
@@ -599,8 +617,7 @@
                     <div class="toggle-row"><label>Free Mode (momentum scroll)</label><input type="checkbox" id="freeMode"></div>
                     <div class="toggle-row"><label>Mousewheel / Trackpad Scroll</label><input type="checkbox" id="mousewheel"></div>
                     <div class="helper-text" style="margin-top:-4px;margin-bottom:12px;">Keyboard arrow-key navigation is always on (when the carousel is in view).</div>
-                    <div class="toggle-row"><label>Draggable Scrollbar</label><input type="checkbox" id="scrollbar"></div>
-                    <div class="toggle-row" id="scrollbarDragRow" style="display:none;"><label>Scrollbar Is Draggable</label><input type="checkbox" id="scrollbarDraggable" checked></div>
+                    <div class="toggle-row"><label>Show Scrollbar (draggable)</label><input type="checkbox" id="scrollbar"></div>
                     <div class="color-row" id="scrollbarStyleRow" style="display:none;">
                         <div class="color-chip"><span class="color-label">Track Color</span><input type="color" id="scrollbarTrackColor" value="#e7e7e7"></div>
                         <div class="color-chip"><span class="color-label">Handle Color</span><input type="color" id="scrollbarDragColor" value="#222222"></div>
@@ -769,17 +786,20 @@
         /* ----------------------------- defaults ----------------------------- */
         const DEFAULTS = {
           limit: 20, speed: 300, featured: false, events: "all",
-          spvSm: 1, spvMd: 2, spvLg: 4, sbSm: 17, sbMd: 34, sbLg: 54,
+          filterType: "", filterValue: "",
+          spvSm: 1, spvMd: 2, spvLg: 4, sbSm: 16, sbMd: 20, sbLg: 20,
           aspectRatio: "4/3", slidesPerGroup: 1, groupSlides: false,
           centeredSlides: false, fullWidth: false,
           loop: false, loopFillItems: false, groupSlidesLoopStrategy: "keep-blanks",
           autoplayOn: false, autoplay: 3000, autoplayMode: "default", continuousSpeed: 60,
           pauseOnHover: true, autoplayDisableOnInteraction: false,
-          cardLayout: "standard", button: false, buttonText: "Read More", buttonStyle: "primary",
+          preset: "standard", overlayVariant: "overlay-bottom",
+          button: false, buttonText: "Read More", buttonStyle: "primary",
           navigation: true, navigationLayout: "overlay",
-          pagination: true, paginationType: "bullets", paginationPosition: "bottom-center", dynamicBullets: false, dynamicMainBullets: 8,
+          pagination: true, paginationType: "bullets", paginationPosition: "bottom-center",
+          bulletsPosition: "bottom-left", fractionPosition: "bottom-right", dynamicBullets: false, dynamicMainBullets: 8,
           effect: "", coverflowRotate: 50, coverflowScale: 0.85, coverflowSlideShadows: false,
-          freeMode: false, mousewheel: false, scrollbar: false,
+          freeMode: false, mousewheel: false, scrollbar: false, scrollbarDraggable: true,
           thumbnail: true, title: true, excerpt: true, price: true, eventDates: true,
           categories: false, tags: false, date: false, author: false,
           categoriesPosition: "below-title", tagsPosition: "below-excerpt", eventDatesPosition: "below-title",
@@ -909,10 +929,13 @@
           }
           let pagHTML = "";
           if (cfg.pagination) {
-            const frac = cfg.paginationType === "bullets-fraction"
-              ? `<div class="pagination-fraction"><span class="fraction-current">1</span><span class="fraction-divider"> / </span><span class="fraction-total">${Math.min(cfg.limit, 12)}</span></div>`
-              : "";
-            pagHTML = `<div class="collection-carousel-pagination pagination-pos-${cfg.paginationPosition}"><div class="pagination-wrapper"></div>${frac}</div>`;
+            const posClass = p => `pos-${(p || "bottom-center").replace("bottom-", "")}`;
+            if (cfg.paginationType === "bullets-fraction") {
+              const frac = `<div class="pagination-fraction ${posClass(cfg.fractionPosition)}"><span class="fraction-current">1</span><span class="fraction-divider"> / </span><span class="fraction-total">${Math.min(cfg.limit, 12)}</span></div>`;
+              pagHTML = `<div class="collection-carousel-pagination pagination-split"><div class="pagination-wrapper ${posClass(cfg.bulletsPosition)}"></div>${frac}</div>`;
+            } else {
+              pagHTML = `<div class="collection-carousel-pagination pagination-pos-${cfg.paginationPosition}"><div class="pagination-wrapper"></div></div>`;
+            }
           }
           let scrollbarHTML = cfg.scrollbar ? `<div class="collection-carousel-scrollbar"></div>` : "";
 
@@ -969,6 +992,7 @@
             slidesPerGroup: grp(cfg.spvLg),
             loop: continuous ? true : cfg.loop,
             centeredSlides: cfg.centeredSlides || effect === "coverflow",
+            roundLengths: true,
             grabCursor: true,
             speed: cfg.speed,
             effect,
@@ -1087,6 +1111,8 @@
             limit: Math.max(1, num("limit")),
             featured: chk("featured"),
             events: val("events"),
+            preset: val("preset"), overlayVariant: val("overlayVariant"),
+            filterType: val("filterType"), filterValue: val("filterValue"),
             spvSm: num("spvSm"), spvMd: num("spvMd"), spvLg: num("spvLg"),
             sbSm: num("sbSm"), sbMd: num("sbMd"), sbLg: num("sbLg"),
             aspectRatio: val("aspectRatio"),
@@ -1096,15 +1122,16 @@
             autoplayOn: chk("autoplayOn"), autoplay: num("autoplay"), autoplayMode: val("autoplayMode"),
             continuousSpeed: num("continuousSpeed"), pauseOnHover: chk("pauseOnHover"),
             autoplayDisableOnInteraction: chk("autoplayDisableOnInteraction"),
-            cardLayout: val("cardLayout"),
+            cardLayout: deriveCardLayout(val("preset"), val("overlayVariant")),
             cardBg: val("cardBg"), cardBorderWidth: num("cardBorderWidth"), cardBorderColor: val("cardBorderColor"), cardRadius: num("cardRadius"),
             button: chk("button"), buttonText: val("buttonText"), buttonStyle: val("buttonStyle"),
             navigation: chk("navigation"), navigationLayout: val("navigationLayout"),
             pagination: chk("pagination"), paginationType: val("paginationType"), paginationPosition: val("paginationPosition"),
+            bulletsPosition: val("bulletsPosition"), fractionPosition: val("fractionPosition"),
             dynamicBullets: chk("dynamicBullets"), dynamicMainBullets: num("dynamicMainBullets"),
             effect: val("effect"), coverflowRotate: num("coverflowRotate"), coverflowScale: num("coverflowScale"), coverflowSlideShadows: chk("coverflowSlideShadows"),
             freeMode: chk("freeMode"), mousewheel: chk("mousewheel"),
-            scrollbar: chk("scrollbar"), scrollbarDraggable: chk("scrollbarDraggable"),
+            scrollbar: chk("scrollbar"), scrollbarDraggable: true,
             scrollbarTrackColor: val("scrollbarTrackColor"), scrollbarDragColor: val("scrollbarDragColor"),
             scrollbarSize: num("scrollbarSize"), scrollbarRadius: num("scrollbarRadius"),
             thumbnail: chk("thumbnail"), title: chk("title"), excerpt: chk("excerpt"), price: chk("price"),
@@ -1138,6 +1165,8 @@
           add(c.limit !== DEFAULTS.limit, "limit", c.limit);
           add(c.featured, "featured", "true");
           add(c.events !== DEFAULTS.events, "events", c.events);
+          add(c.filterType === "category" && c.filterValue.trim(), "filter-category", c.filterValue.trim());
+          add(c.filterType === "tag" && c.filterValue.trim(), "filter-tag", c.filterValue.trim());
 
           add(c.spvSm !== DEFAULTS.spvSm, "slides-per-view-sm", c.spvSm);
           add(c.spvMd !== DEFAULTS.spvMd, "slides-per-vies-dld", c.spvMd);
@@ -1165,7 +1194,7 @@
             add(!c.pauseOnHover, "pause-on-hover", "false");
           }
 
-          add(c.cardLayout !== DEFAULTS.cardLayout, "card-layout", c.cardLayout);
+          add(c.cardLayout !== "standard", "card-layout", c.cardLayout);
           add(c.button, "button", "true");
           add(c.button && c.buttonText !== DEFAULTS.buttonText, "button-text", c.buttonText);
           add(c.button && c.buttonStyle !== DEFAULTS.buttonStyle, "button-style", c.buttonStyle);
@@ -1175,7 +1204,12 @@
 
           add(!c.pagination, "pagination", "false");
           add(c.pagination && c.paginationType !== DEFAULTS.paginationType, "pagination-type", c.paginationType);
-          add(c.pagination && c.paginationPosition !== DEFAULTS.paginationPosition, "pagination-position", c.paginationPosition);
+          if (c.pagination && c.paginationType === "bullets-fraction") {
+            add(c.bulletsPosition !== DEFAULTS.bulletsPosition, "bullets-position", c.bulletsPosition);
+            add(c.fractionPosition !== DEFAULTS.fractionPosition, "fraction-position", c.fractionPosition);
+          } else {
+            add(c.pagination && c.paginationPosition !== DEFAULTS.paginationPosition, "pagination-position", c.paginationPosition);
+          }
           add(c.pagination && c.dynamicBullets && c.paginationType.includes("bullets"), "dynamic-bullets", c.dynamicMainBullets);
 
           add(!!c.effect, "effect", c.effect);
@@ -1186,7 +1220,6 @@
           add(c.freeMode, "free-mode", "true");
           add(c.mousewheel && !c.freeMode, "mousewheel", "true");
           add(c.scrollbar, "scrollbar", "true");
-          add(c.scrollbar && !c.scrollbarDraggable, "scrollbar-draggable", "false");
 
           add(!c.thumbnail, "thumbnail", "false");
           add(!c.title, "title", "false");
@@ -1246,10 +1279,12 @@ ${styleBlock}<div id="${c.elId}"
 
         function highlight(text) {
           const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-          return esc(text).split("\n").map(line => {
-            let h = line;
-            h = h.replace(/(data-[\w-]+)(=)/g, '<span class="hl-attr">$1</span>$2');
-            h = h.replace(/(=)(&quot;[^&]*&quot;|"[^"]*")/g, (m,e,v)=>`${e}<span class="hl-str">${v}</span>`);
+          return text.split("\n").map(line => {
+            let h = esc(line);
+            // Highlight attr="value" pairs in a single pass so the inserted
+            // <span class="..."> markup is never re-matched.
+            h = h.replace(/([\w-]+)(=)("[^"]*")/g, (m, a, eq, v) => `<span class="hl-attr">${a}</span>${eq}<span class="hl-str">${v}</span>`);
+            // Tag names (escaped angle brackets only — won't touch inserted spans)
             h = h.replace(/(&lt;\/?[\w!-]+)/g, '<span class="hl-tag">$1</span>');
             return h;
           }).join("\n");
@@ -1273,6 +1308,21 @@ ${styleBlock}<div id="${c.elId}"
           document.getElementById("dynMainRow").style.display = (chk("pagination") && val("paginationType").includes("bullets") && chk("dynamicBullets")) ? "block" : "none";
           document.getElementById("coverflowOpts").style.display = val("effect") === "coverflow" ? "block" : "none";
 
+          // preset sub-controls
+          const preset = val("preset");
+          document.getElementById("overlayVariantRow").style.display = preset === "overlay" ? "block" : "none";
+          document.getElementById("premiumStyleRow").style.display = (preset === "premium" || preset === "sqsp-tools") ? "block" : "none";
+
+          // category/tag filter
+          const ft = val("filterType");
+          document.getElementById("filterValueRow").style.display = ft ? "block" : "none";
+          document.getElementById("filterValueLabel").textContent = ft === "tag" ? "Tag name" : "Category name";
+
+          // pagination position (single vs split for bullets+fraction)
+          const split = chk("pagination") && val("paginationType") === "bullets-fraction";
+          document.getElementById("paginationPositionRow").style.display = (chk("pagination") && !split) ? "block" : "none";
+          document.getElementById("splitPositionRow").style.display = split ? "grid" : "none";
+
           // meta element details + pill style blocks
           [["categories", "categoriesDetail"], ["tags", "tagsDetail"], ["eventDates", "eventDatesDetail"], ["date", "dateDetail"], ["author", "authorDetail"]].forEach(([t, d]) => {
             document.getElementById(d).style.display = chk(t) ? "block" : "none";
@@ -1282,9 +1332,7 @@ ${styleBlock}<div id="${c.elId}"
           });
 
           // scrollbar style rows
-          const sbOn = chk("scrollbar");
-          document.getElementById("scrollbarDragRow").style.display = sbOn ? "flex" : "none";
-          document.getElementById("scrollbarStyleRow").style.display = sbOn ? "flex" : "none";
+          document.getElementById("scrollbarStyleRow").style.display = chk("scrollbar") ? "flex" : "none";
 
           // autoplay rows
           const apOn = chk("autoplayOn");
@@ -1295,10 +1343,6 @@ ${styleBlock}<div id="${c.elId}"
           document.getElementById("autoplayStopRow").style.display = cont ? "none" : "flex";
           document.getElementById("continuousSpeedRow").style.display = cont ? "block" : "none";
 
-          // card design rows
-          const cl = val("cardLayout");
-          document.getElementById("premiumOpts").style.display = cl === "premium" ? "block" : "none";
-          document.getElementById("overlayHelp").style.display = (cl === "overlay-bottom" || cl === "overlay-top" || cl === "hero") ? "block" : "none";
           document.getElementById("buttonOpts").style.display = chk("button") ? "block" : "none";
         }
 
@@ -1327,22 +1371,34 @@ ${styleBlock}<div id="${c.elId}"
         window.togGroup = function(h) { h.parentNode.classList.toggle("open"); };
 
         /* ----------------------------- presets ------------------------------ */
+        // Each preset is a complete starting layout. cardLayout is derived from
+        // the preset name (+ overlayVariant), not a separate control.
         const PRESETS = {
-          cards: { cardLayout: "premium", spvLg: 3, spvMd: 2, spvSm: 1, aspectRatio: "4/3", navigationLayout: "overlay", pagination: true, paginationType: "bullets", button: true, buttonStyle: "text-arrow", categories: true, categoriesPosition: "below-title", tags: false, scrollbar: false, autoplayOn: false, effect: "", loop: false },
-          marquee: { autoplayOn: true, autoplayMode: "continuous", continuousSpeed: 60, pauseOnHover: true, loop: true, navigation: false, pagination: false, scrollbar: false, spvLg: 4, spvMd: 3, spvSm: 1.3, aspectRatio: "4/3", cardLayout: "standard", button: false, effect: "" },
-          overlay: { cardLayout: "overlay-bottom", spvLg: 3, spvMd: 2, spvSm: 1.1, aspectRatio: "3/4", categories: true, categoriesPosition: "below-title", tags: false, date: true, datePosition: "above-title", excerpt: true, button: false, navigationLayout: "overlay", pagination: true, effect: "", loop: false },
-          "sqsp-hero": { cardLayout: "hero", spvLg: 1, spvMd: 1, spvSm: 1, aspectRatio: "16/9", loop: true, navigation: true, navigationLayout: "overlay", pagination: true, paginationType: "bullets", button: true, buttonStyle: "primary", categories: false, tags: false, excerpt: true, title: true, effect: "fade", autoplayOn: true, autoplayMode: "default", autoplay: 5000 },
-          "sqsp-features": { cardLayout: "standard", spvLg: 4, spvMd: 2, spvSm: 1.2, aspectRatio: "1/1", thumbnail: true, title: true, excerpt: true, button: true, buttonStyle: "text-arrow", categories: false, tags: false, navigation: true, navigationLayout: "overlay", pagination: false, scrollbar: false, effect: "", loop: false, autoplayOn: false },
-          "sqsp-tools": { cardLayout: "premium", spvLg: 4, spvMd: 2, spvSm: 1.2, aspectRatio: "16/9", title: true, excerpt: true, button: true, buttonStyle: "text-arrow", categories: false, tags: false, navigation: true, navigationLayout: "bottom right", pagination: false, scrollbar: true, effect: "", loop: false, autoplayOn: false },
+          standard: {},
+          premium: { spvLg: 3, spvMd: 2, spvSm: 1, aspectRatio: "4/3", button: true, buttonStyle: "text-arrow", navigation: true, navigationLayout: "overlay", pagination: true },
+          marquee: { autoplayOn: true, autoplayMode: "continuous", continuousSpeed: 60, pauseOnHover: true, loop: true, navigation: false, pagination: false, spvLg: 4, spvMd: 3, spvSm: 1.3, aspectRatio: "4/3" },
+          overlay: { overlayVariant: "overlay-bottom", spvLg: 3, spvMd: 2, spvSm: 1.1, aspectRatio: "3/4", categories: true, categoriesPosition: "below-title", date: true, datePosition: "above-title", excerpt: true, navigation: true, navigationLayout: "overlay", pagination: true },
+          "sqsp-hero": { spvLg: 1, spvMd: 1, spvSm: 1, aspectRatio: "16/9", loop: true, navigation: true, navigationLayout: "overlay", pagination: true, button: true, buttonStyle: "primary", excerpt: true, autoplayOn: true, autoplayMode: "default", autoplay: 5000 },
+          "sqsp-features": { spvLg: 4, spvMd: 2, spvSm: 1.2, aspectRatio: "1/1", button: true, buttonStyle: "text-arrow", navigation: true, navigationLayout: "overlay", pagination: false },
+          "sqsp-tools": { spvLg: 4, spvMd: 2, spvSm: 1.2, aspectRatio: "16/9", button: true, buttonStyle: "text-arrow", navigation: true, navigationLayout: "bottom right", pagination: false },
         };
+        // Keys reset to defaults whenever a preset is (re)applied, so switching
+        // back to Standard fully clears any prior preset's options.
+        const RESET_KEYS = ["spvSm","spvMd","spvLg","sbSm","sbMd","sbLg","aspectRatio","speed","slidesPerGroup","groupSlides","centeredSlides","fullWidth","loop","loopFillItems","autoplayOn","autoplay","autoplayMode","continuousSpeed","pauseOnHover","autoplayDisableOnInteraction","navigation","navigationLayout","pagination","paginationType","paginationPosition","bulletsPosition","fractionPosition","dynamicBullets","effect","button","buttonText","buttonStyle","thumbnail","title","excerpt","price","categories","categoriesPosition","tags","tagsPosition","date","datePosition","author","authorPosition","scrollbar","overlayVariant"];
+        function deriveCardLayout(preset, overlayVariant) {
+          if (preset === "premium" || preset === "sqsp-tools") return "premium";
+          if (preset === "overlay") return overlayVariant || "overlay-bottom";
+          if (preset === "sqsp-hero") return "hero";
+          return "standard";
+        }
         function setControl(id, v) {
           const e = document.getElementById(id);
           if (!e) return;
           if (e.type === "checkbox") e.checked = !!v; else e.value = v;
         }
         window.applyPreset = function(name) {
-          const p = PRESETS[name];
-          if (!p) { updateAll(); return; }
+          RESET_KEYS.forEach(k => { if (DEFAULTS[k] !== undefined) setControl(k, DEFAULTS[k]); });
+          const p = PRESETS[name] || {};
           Object.entries(p).forEach(([k, v]) => setControl(k, v));
           updateAll();
         };

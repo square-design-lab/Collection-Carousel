@@ -1221,6 +1221,32 @@ html:has([data-sdl-plugin="collection-carousel"]) {
   line-height: 1;
 }
 
+/* Split pagination: bullets + fraction positioned independently */
+[data-sdl-plugin="collection-carousel"] .collection-carousel-pagination.pagination-split {
+  position: relative;
+  display: block;
+  min-height: 1.4em;
+}
+[data-sdl-plugin="collection-carousel"] .pagination-split .pagination-wrapper,
+[data-sdl-plugin="collection-carousel"] .pagination-split .pagination-fraction {
+  position: absolute;
+  bottom: 0;
+}
+[data-sdl-plugin="collection-carousel"] .pagination-split .pos-left {
+  left: 0;
+  right: auto;
+  transform: none;
+}
+[data-sdl-plugin="collection-carousel"] .pagination-split .pos-right {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+[data-sdl-plugin="collection-carousel"] .pagination-split .pos-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 [data-sdl-plugin="collection-carousel"] .pagination-wrapper {
   position: relative;
   display: inline-flex;
