@@ -77,6 +77,13 @@
       autoplay: false,
       autoplayDelay: 3000,
       autoplayDisableOnInteraction: false,
+      autoplayMode: "default", // "default" (step) or "continuous" (marquee)
+      continuousSpeed: 60, // px/sec for continuous mode
+      pauseOnHover: true,
+      cardLayout: "standard", // standard | overlay-bottom | overlay-top | premium | hero
+      button: false,
+      buttonText: "Read More",
+      buttonStyle: "primary", // primary | text | text-underline | text-arrow
       navigation: true,
       navigationArrowPrev: null,
       navigationArrowNext: null,
@@ -396,7 +403,7 @@
       slidesPerGroup: getGroupSize(settings.slidesPerGroup, settings.slidesPerGroup, settings.slidesPerView),
       spaceBetween: parseInt(settings.spaceBetween),
       slidesOffsetBefore: 0,
-      loop: settings.loop,
+      loop: settings.autoplay && settings.autoplayMode === "continuous" ? true : settings.loop,
       centeredSlides: settings.centeredSlides,
       touchEventsTarget: "container",
       effect: settings.effect,
@@ -432,10 +439,17 @@
       keyboard: { enabled: true, onlyInViewport: true },
       mousewheel: { enabled: settings.mousewheel, forceToAxis: true },
       autoplay: settings.autoplay
-        ? {
-            delay: Math.max(500, parseInt(settings.autoplay)),
-            disableOnInteraction: settings.autoplayDisableOnInteraction,
-          }
+        ? settings.autoplayMode === "continuous"
+          ? {
+              delay: 0,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: !!settings.pauseOnHover,
+            }
+          : {
+              delay: Math.max(500, parseInt(settings.autoplay)),
+              disableOnInteraction: settings.autoplayDisableOnInteraction,
+              pauseOnMouseEnter: !!settings.pauseOnHover,
+            }
         : false,
       navigation: {
         enabled: settings.navigation,
@@ -500,6 +514,21 @@
         init: function (swiper) {
           updateSwiperOffsets(swiper);
           updateSlideWidths(swiper);
+
+          // Continuous marquee: linear timing + speed derived from px/sec.
+          if (settings.autoplay && settings.autoplayMode === "continuous") {
+            swiper.wrapperEl.style.transitionTimingFunction = "linear";
+            const applyContinuousSpeed = () => {
+              const slide = swiper.slides[swiper.activeIndex] || swiper.slides[0];
+              const slideW = slide ? slide.offsetWidth : 300;
+              const gap = parseInt(swiper.params.spaceBetween) || 0;
+              const pxPerSec = Math.max(5, parseFloat(settings.continuousSpeed) || 60);
+              swiper.params.speed = Math.max(1, Math.round(((slideW + gap) / pxPerSec) * 1000));
+            };
+            applyContinuousSpeed();
+            window.addEventListener("resize", applyContinuousSpeed);
+          }
+
           window.addEventListener("resize", () => {
             updateSwiperOffsets(swiper);
             updateSlideWidths(swiper);
@@ -952,6 +981,16 @@
   function buildStructure(cc) {
     const settings = cc.settings;
 
+    // Continuous marquee autoplay needs loop enabled to be seamless.
+    if (settings.autoplay && settings.autoplayMode === "continuous") {
+      settings.loop = true;
+    }
+
+    // Card layout class on the host element.
+    if (settings.cardLayout && settings.cardLayout !== "standard") {
+      cc.el.classList.add(`card-layout-${settings.cardLayout}`);
+    }
+
     const swiperContainer = document.createElement("div");
     cc.swiperContainer = swiperContainer;
     swiperContainer.className = "swiper collection-carousel";
@@ -1203,6 +1242,33 @@
         if (contentPiece === "metadataBelowTitle" && belowTitle) content.appendChild(belowTitle);
         if (contentPiece === "metadataBelowExcerpt" && belowExcerpt) content.appendChild(belowExcerpt);
       });
+
+      // Optional call-to-action button (links to the item).
+      if (settings.button) {
+        const href = settings.sdlPopups
+          ? `#sdl-popup=${item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl}`
+          : item.passthrough && item.sourceUrl
+          ? item.sourceUrl
+          : item.fullUrl;
+        const button = document.createElement("a");
+        button.href = href;
+        button.target = settings.newWindow ? "_blank" : "_self";
+        button.className = `content-button button-style-${settings.buttonStyle}`;
+        const arrow =
+          settings.buttonStyle === "text-arrow"
+            ? `<svg class="button-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`
+            : "";
+        button.innerHTML = `<span class="button-label">${settings.buttonText}</span>${arrow}`;
+        // Primary style adopts the site's Squarespace primary button styling.
+        if (settings.buttonStyle === "primary") {
+          button.classList.add(
+            "sqs-block-button-element",
+            "sqs-block-button-element--medium",
+            "sqs-button-element--primary"
+          );
+        }
+        content.appendChild(button);
+      }
 
       slide.appendChild(content);
       swiperWrapper.appendChild(slide);

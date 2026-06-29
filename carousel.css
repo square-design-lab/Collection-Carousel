@@ -1474,3 +1474,126 @@ html:has([data-sdl-plugin="collection-carousel"]) {
     var(--sdl-cc-navigation-height, 100%) + (2 * var(--sdl-cc-border-width, 0px))
   );
 }
+/* ==================================================================
+ *  PHASE 2 — Card layouts & buttons
+ * ================================================================== */
+
+/* ---- Call-to-action button ---- */
+[data-sdl-plugin="collection-carousel"] .content-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: var(--sdl-cc-button-spacing, 14px);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: var(--sdl-cc-button-font-family, inherit);
+  font-size: var(--sdl-cc-button-font-size, 0.95rem);
+  color: var(--sdl-cc-button-color, var(--paragraphMediumColor));
+  line-height: 1.2;
+}
+[data-sdl-plugin="collection-carousel"] .content-button .button-arrow {
+  transition: transform 0.2s ease;
+}
+[data-sdl-plugin="collection-carousel"] .content-button:hover .button-arrow {
+  transform: translateX(4px);
+}
+[data-sdl-plugin="collection-carousel"] .button-style-text-underline .button-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* Primary: adopts the site's Squarespace button styling on live; :where() keeps
+   specificity 0 so the SS theme always wins. Provides a sensible fallback
+   (and powers the config-UI preview where no SS theme is present). */
+[data-sdl-plugin="collection-carousel"] :where(.content-button.button-style-primary) {
+  padding: 11px 24px;
+  background: var(--sdl-cc-button-bg, var(--primaryButtonBackgroundColor, #111));
+  color: var(--sdl-cc-button-text, var(--primaryButtonTextColor, #fff));
+  border-radius: var(--sdl-cc-button-radius, 4px);
+  font-weight: 500;
+}
+
+/* ---- Premium card ---- */
+[data-sdl-plugin="collection-carousel"].card-layout-premium .collection-carousel-slide {
+  background: var(--sdl-cc-card-background, #ffffff);
+  border: var(--sdl-cc-card-border-width, 1px) solid
+    var(--sdl-cc-card-border-color, #e8e8e8);
+  border-radius: var(--sdl-cc-card-border-radius, 14px);
+  overflow: hidden;
+  box-shadow: var(--sdl-cc-card-shadow, 0 6px 20px rgba(0, 0, 0, 0.07));
+  display: flex;
+  flex-direction: column;
+}
+[data-sdl-plugin="collection-carousel"].card-layout-premium .slide-content {
+  padding: var(--sdl-cc-card-padding, 20px);
+  flex: 1;
+}
+[data-sdl-plugin="collection-carousel"].card-layout-premium .slide-thumbnail {
+  border-radius: 0;
+}
+
+/* ---- Overlay card layouts (content sits over the image) ---- */
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-bottom .collection-carousel-slide,
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-top .collection-carousel-slide,
+[data-sdl-plugin="collection-carousel"].card-layout-hero .collection-carousel-slide {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sdl-cc-card-border-radius, 0);
+  /* Light text over imagery */
+  --sdl-cc-title-color: var(--sdl-cc-overlay-text-color, #ffffff);
+  --sdl-cc-excerpt-color: var(--sdl-cc-overlay-muted-color, rgba(255, 255, 255, 0.88));
+  --sdl-cc-category-color: var(--sdl-cc-overlay-text-color, #ffffff);
+  --sdl-cc-tag-color: var(--sdl-cc-overlay-text-color, #ffffff);
+  --sdl-cc-price-color: var(--sdl-cc-overlay-text-color, #ffffff);
+  --sdl-cc-event-dates-color: var(--sdl-cc-overlay-text-color, #ffffff);
+  --sdl-cc-published-date-color: var(--sdl-cc-overlay-muted-color, rgba(255, 255, 255, 0.88));
+  --sdl-cc-author-color: var(--sdl-cc-overlay-muted-color, rgba(255, 255, 255, 0.88));
+  --sdl-cc-button-color: #ffffff;
+}
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-bottom .slide-thumbnail,
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-top .slide-thumbnail,
+[data-sdl-plugin="collection-carousel"].card-layout-hero .slide-thumbnail {
+  margin: 0;
+}
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-bottom .slide-content,
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-top .slide-content,
+[data-sdl-plugin="collection-carousel"].card-layout-hero .slide-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: var(--sdl-cc-overlay-content-padding, 24px);
+  box-sizing: border-box;
+}
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-bottom .slide-content,
+[data-sdl-plugin="collection-carousel"].card-layout-hero .slide-content {
+  bottom: 0;
+  top: auto;
+  background: linear-gradient(
+    to top,
+    var(--sdl-cc-overlay-scrim, rgba(0, 0, 0, 0.78)) 0%,
+    rgba(0, 0, 0, 0) 80%
+  );
+}
+[data-sdl-plugin="collection-carousel"].card-layout-overlay-top .slide-content {
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(
+    to bottom,
+    var(--sdl-cc-overlay-scrim, rgba(0, 0, 0, 0.6)) 0%,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(0, 0, 0, 0) 55%,
+    var(--sdl-cc-overlay-scrim, rgba(0, 0, 0, 0.6)) 100%
+  );
+}
+/* Hero: bigger type + taller default ratio */
+[data-sdl-plugin="collection-carousel"].card-layout-hero .slide-thumbnail {
+  aspect-ratio: var(--sdl-cc-aspect-ratio, 16/9);
+}
+[data-sdl-plugin="collection-carousel"].card-layout-hero .slide-content {
+  padding: var(--sdl-cc-overlay-content-padding, 40px);
+  --sdl-cc-title-font-size: var(--sdl-cc-hero-title-size, var(--heading-1-font-size, 2.4rem));
+}
