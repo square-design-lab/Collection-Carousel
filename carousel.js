@@ -34,8 +34,8 @@
       eventDates: true,
       title: true,
       excerpt: true,
-      categories: true,
-      tags: true,
+      categories: false,
+      tags: false,
       date: false,
       author: false,
       // First-class placement for each meta element. Allowed values:
@@ -89,7 +89,8 @@
       navigationArrowNext: null,
       navigationLayout: "overlay",
       pagination: true,
-      paginationType: "bullets",
+      paginationType: "bullets", // "bullets" | "fraction" | "bullets-fraction"
+      paginationPosition: "bottom-center", // bottom-center | bottom-left | bottom-right
       dynamicBullets: false,
       dynamicMainBullets: 8,
       scrollbar: false,
@@ -107,7 +108,6 @@
       effect: null,
       coverflowRotate: 0,
       coverflowScale: 1,
-      sdlPopups: false,
       coverflowSlideShadows: false,
       creative: {
         limitProgress: 3,
@@ -398,6 +398,17 @@
       container.style.setProperty("--sdl-cc-navigation-height", `${image.offsetHeight}px`);
     };
 
+    // Updates the manual fraction element used by the "bullets-fraction" type.
+    const updateFraction = swiper => {
+      if (!swiper) return;
+      const cur = container.querySelector(
+        `#${settings.id} .pagination-fraction .fraction-current`
+      );
+      if (!cur) return;
+      const index = typeof swiper.realIndex === "number" ? swiper.realIndex : swiper.activeIndex;
+      cur.textContent = index + 1;
+    };
+
     return {
       slidesPerView: mainView.slidesPerView,
       slidesPerGroup: getGroupSize(settings.slidesPerGroup, settings.slidesPerGroup, settings.slidesPerView),
@@ -462,7 +473,8 @@
         enabled: settings.pagination,
         el: `#${settings.id} .collection-carousel-pagination .pagination-wrapper`,
         clickable: true,
-        type: settings.paginationType,
+        // "bullets-fraction" shows clickable bullets here + a separate fraction element.
+        type: settings.paginationType === "bullets-fraction" ? "bullets" : settings.paginationType,
         dynamicBullets: settings.dynamicBullets,
         dynamicMainBullets: settings.dynamicMainBullets,
       },
@@ -511,9 +523,13 @@
             }, duration + 10);
           }
         },
+        slideChange: function (swiper) {
+          updateFraction(swiper);
+        },
         init: function (swiper) {
           updateSwiperOffsets(swiper);
           updateSlideWidths(swiper);
+          updateFraction(swiper);
 
           // Continuous marquee: linear timing + speed derived from px/sec.
           if (settings.autoplay && settings.autoplayMode === "continuous") {
@@ -1105,11 +1121,7 @@
         if (settings.clickthrough) {
           const imageLink = document.createElement("a");
           imageLink.className = "slide-thumbnail-link";
-          imageLink.href = settings.sdlPopups
-            ? `#sdl-popup=${item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl}`
-            : item.passthrough && item.sourceUrl
-            ? item.sourceUrl
-            : item.fullUrl;
+          imageLink.href = item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl;
           imageLink.target = settings.newWindow ? "_blank" : "_self";
           imageContainer.appendChild(image);
           imageContainer.appendChild(imageLink);
@@ -1129,11 +1141,7 @@
         const titleContent = document.createElement("h3");
         if (settings.clickthrough) {
           const titleLink = document.createElement("a");
-          titleLink.href = settings.sdlPopups
-            ? `#sdl-popup=${item.passthrough ? item.sourceUrl : item.fullUrl}`
-            : item.passthrough && item.sourceUrl
-            ? item.sourceUrl
-            : item.fullUrl;
+          titleLink.href = item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl;
           titleLink.target = settings.newWindow ? "_blank" : "_self";
           titleLink.innerHTML = item.title;
           titleContent.appendChild(titleLink);
@@ -1245,11 +1253,7 @@
 
       // Optional call-to-action button (links to the item).
       if (settings.button) {
-        const href = settings.sdlPopups
-          ? `#sdl-popup=${item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl}`
-          : item.passthrough && item.sourceUrl
-          ? item.sourceUrl
-          : item.fullUrl;
+        const href = item.passthrough && item.sourceUrl ? item.sourceUrl : item.fullUrl;
         const button = document.createElement("a");
         button.href = href;
         button.target = settings.newWindow ? "_blank" : "_self";
@@ -1316,10 +1320,17 @@
     if (settings.pagination) {
       const pagination = document.createElement("div");
       cc.pagination = pagination;
-      pagination.className = "collection-carousel-pagination";
+      pagination.className = `collection-carousel-pagination pagination-pos-${settings.paginationPosition || "bottom-center"}`;
       const paginationWrapper = document.createElement("div");
       paginationWrapper.className = "pagination-wrapper";
       pagination.appendChild(paginationWrapper);
+      // "bullets-fraction" adds a separate fraction element next to the bullets.
+      if (settings.paginationType === "bullets-fraction") {
+        const fraction = document.createElement("div");
+        fraction.className = "pagination-fraction";
+        fraction.innerHTML = `<span class="fraction-current">1</span><span class="fraction-divider"> / </span><span class="fraction-total">${cc.items.length}</span>`;
+        pagination.appendChild(fraction);
+      }
       cc.el.appendChild(pagination);
     }
 

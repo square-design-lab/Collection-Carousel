@@ -1197,7 +1197,28 @@ html:has([data-sdl-plugin="collection-carousel"]) {
   justify-content: center;
   pointer-events: auto;
   align-items: center;
+  gap: var(--pagination-gap, 17px);
   padding-top: var(--sdl-cc-pagination-top-padding, 17px);
+}
+
+/* Pagination position (when not inside a bottom nav row) */
+[data-sdl-plugin="collection-carousel"] .collection-carousel-pagination.pagination-pos-bottom-left {
+  justify-content: flex-start;
+}
+[data-sdl-plugin="collection-carousel"] .collection-carousel-pagination.pagination-pos-bottom-right {
+  justify-content: flex-end;
+}
+[data-sdl-plugin="collection-carousel"] .collection-carousel-pagination.pagination-pos-bottom-center {
+  justify-content: center;
+}
+
+/* Fraction shown alongside bullets ("bullets-fraction" type) */
+[data-sdl-plugin="collection-carousel"] .pagination-fraction {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--sdl-cc-fraction-font-size, 0.9rem);
+  color: var(--sdl-cc-fraction-color, var(--paragraphMediumColor));
+  line-height: 1;
 }
 
 [data-sdl-plugin="collection-carousel"] .pagination-wrapper {

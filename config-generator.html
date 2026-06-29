@@ -500,7 +500,15 @@
                         <select id="paginationType">
                             <option value="bullets" selected>Bullets</option>
                             <option value="fraction">Fraction</option>
-                            <option value="progressbar">Progress bar</option>
+                            <option value="bullets-fraction">Bullets + Fraction</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>Position</label>
+                        <select id="paginationPosition">
+                            <option value="bottom-center" selected>Bottom center</option>
+                            <option value="bottom-left">Bottom left</option>
+                            <option value="bottom-right">Bottom right</option>
                         </select>
                     </div>
                     <div class="toggle-row" id="dynBulletsRow"><label>Dynamic Bullets</label><input type="checkbox" id="dynamicBullets"></div>
@@ -625,7 +633,7 @@
 
                     <!-- Categories -->
                     <div class="meta-block">
-                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Categories</label><input type="checkbox" id="categories" checked></div>
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Categories</label><input type="checkbox" id="categories"></div>
                         <div class="meta-detail" id="categoriesDetail">
                             <div class="control-row"><label>Position</label><select id="categoriesPosition" class="pos-select"></select></div>
                             <div class="toggle-row"><label>Pill / badge style</label><input type="checkbox" id="categoriesPill"></div>
@@ -642,7 +650,7 @@
 
                     <!-- Tags -->
                     <div class="meta-block">
-                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Tags</label><input type="checkbox" id="tags" checked></div>
+                        <div class="toggle-row"><label style="font-weight:600;color:var(--text-main)">Tags</label><input type="checkbox" id="tags"></div>
                         <div class="meta-detail" id="tagsDetail">
                             <div class="control-row"><label>Position</label><select id="tagsPosition" class="pos-select"></select></div>
                             <div class="toggle-row"><label>Pill / badge style</label><input type="checkbox" id="tagsPill"></div>
@@ -728,7 +736,6 @@
                         <label>Cache Duration (minutes — 0 = off)</label>
                         <input type="number" id="cacheDuration" value="0" min="0">
                     </div>
-                    <div class="toggle-row"><label>SDL Popups Integration</label><input type="checkbox" id="sdlPopups"></div>
                 </div>
             </div>
 
@@ -770,17 +777,17 @@
           pauseOnHover: true, autoplayDisableOnInteraction: false,
           cardLayout: "standard", button: false, buttonText: "Read More", buttonStyle: "primary",
           navigation: true, navigationLayout: "overlay",
-          pagination: true, paginationType: "bullets", dynamicBullets: false, dynamicMainBullets: 8,
+          pagination: true, paginationType: "bullets", paginationPosition: "bottom-center", dynamicBullets: false, dynamicMainBullets: 8,
           effect: "", coverflowRotate: 50, coverflowScale: 0.85, coverflowSlideShadows: false,
           freeMode: false, mousewheel: false, scrollbar: false,
           thumbnail: true, title: true, excerpt: true, price: true, eventDates: true,
-          categories: true, tags: true, date: false, author: false,
+          categories: false, tags: false, date: false, author: false,
           categoriesPosition: "below-title", tagsPosition: "below-excerpt", eventDatesPosition: "below-title",
           datePosition: "above-title", authorPosition: "above-title",
           clickthrough: true, newWindow: false,
           metadataDelimiter: "|", categoriesDelimiter: ", ", tagsDelimiter: ", ",
           metadataCategoryLinks: false, metadataTagLinks: false,
-          cacheDuration: 0, sdlPopups: false
+          cacheDuration: 0
         };
         const POSITIONS = [
           ["above-title", "Above title"],
@@ -900,7 +907,13 @@
               <div class="navigation-button-next"><button><div class="swiper-button-background"></div>${arrowNext}</button></div>
             </div>`;
           }
-          let pagHTML = cfg.pagination ? `<div class="collection-carousel-pagination"><div class="pagination-wrapper"></div></div>` : "";
+          let pagHTML = "";
+          if (cfg.pagination) {
+            const frac = cfg.paginationType === "bullets-fraction"
+              ? `<div class="pagination-fraction"><span class="fraction-current">1</span><span class="fraction-divider"> / </span><span class="fraction-total">${Math.min(cfg.limit, 12)}</span></div>`
+              : "";
+            pagHTML = `<div class="collection-carousel-pagination pagination-pos-${cfg.paginationPosition}"><div class="pagination-wrapper"></div>${frac}</div>`;
+          }
           let scrollbarHTML = cfg.scrollbar ? `<div class="collection-carousel-scrollbar"></div>` : "";
 
           if (previewSwiper) { try { previewSwiper.destroy(true, true); } catch (e) {} previewSwiper = null; }
@@ -922,6 +935,13 @@
           }
 
           previewSwiper = new Swiper(root.querySelector(".swiper"), buildSwiperConfig(cfg, root));
+        }
+
+        function updateFrac(sw, root) {
+          const cur = root.querySelector(".pagination-fraction .fraction-current");
+          if (!cur) return;
+          const i = typeof sw.realIndex === "number" ? sw.realIndex : sw.activeIndex;
+          cur.textContent = i + 1;
         }
 
         // Mirrors carousel.js getSwiperConfig so the preview matches the live plugin.
@@ -962,7 +982,7 @@
                   : { delay, disableOnInteraction: cfg.autoplayDisableOnInteraction, pauseOnMouseEnter: cfg.pauseOnHover })
               : false,
             navigation: cfg.navigation ? { nextEl: root.querySelector(".navigation-button-next"), prevEl: root.querySelector(".navigation-button-prev") } : false,
-            pagination: cfg.pagination ? { el: root.querySelector(".pagination-wrapper"), clickable: true, type: cfg.paginationType, dynamicBullets: cfg.dynamicBullets, dynamicMainBullets: cfg.dynamicMainBullets } : false,
+            pagination: cfg.pagination ? { el: root.querySelector(".pagination-wrapper"), clickable: true, type: cfg.paginationType === "bullets-fraction" ? "bullets" : cfg.paginationType, dynamicBullets: cfg.dynamicBullets, dynamicMainBullets: cfg.dynamicMainBullets } : false,
             scrollbar: cfg.scrollbar ? { el: root.querySelector(".collection-carousel-scrollbar"), draggable: cfg.scrollbarDraggable } : false,
             breakpoints: {
               0: { slidesPerView: spvVal(cfg.spvSm), spaceBetween: cfg.sbSm, slidesPerGroup: grp(cfg.spvSm) },
@@ -979,7 +999,9 @@
                   const pps = Math.max(5, cfg.continuousSpeed || 60);
                   sw.params.speed = Math.max(1, Math.round(((w + g) / pps) * 1000));
                 }
+                updateFrac(sw, root);
               },
+              slideChange(sw) { updateFrac(sw, root); },
             },
           };
           if (creativeEffect) conf.creativeEffect = creativeEffect;
@@ -1078,7 +1100,7 @@
             cardBg: val("cardBg"), cardBorderWidth: num("cardBorderWidth"), cardBorderColor: val("cardBorderColor"), cardRadius: num("cardRadius"),
             button: chk("button"), buttonText: val("buttonText"), buttonStyle: val("buttonStyle"),
             navigation: chk("navigation"), navigationLayout: val("navigationLayout"),
-            pagination: chk("pagination"), paginationType: val("paginationType"),
+            pagination: chk("pagination"), paginationType: val("paginationType"), paginationPosition: val("paginationPosition"),
             dynamicBullets: chk("dynamicBullets"), dynamicMainBullets: num("dynamicMainBullets"),
             effect: val("effect"), coverflowRotate: num("coverflowRotate"), coverflowScale: num("coverflowScale"), coverflowSlideShadows: chk("coverflowSlideShadows"),
             freeMode: chk("freeMode"), mousewheel: chk("mousewheel"),
@@ -1096,7 +1118,7 @@
             clickthrough: chk("clickthrough"), newWindow: chk("newWindow"),
             metadataDelimiter: val("metadataDelimiter"), categoriesDelimiter: val("categoriesDelimiter"), tagsDelimiter: val("tagsDelimiter"),
             metadataCategoryLinks: chk("metadataCategoryLinks"), metadataTagLinks: chk("metadataTagLinks"),
-            cacheDuration: num("cacheDuration"), sdlPopups: chk("sdlPopups"),
+            cacheDuration: num("cacheDuration"),
             borderRadius: num("borderRadius"), arrowSize: num("arrowSize"), arrowBgSize: num("arrowBgSize"), bulletSize: num("bulletSize"),
             arrowColor: val("arrowColor"), arrowBg: val("arrowBg"), activeBullet: val("activeBullet"),
             titleColor: val("titleColor"), excerptColor: val("excerptColor")
@@ -1153,7 +1175,8 @@
 
           add(!c.pagination, "pagination", "false");
           add(c.pagination && c.paginationType !== DEFAULTS.paginationType, "pagination-type", c.paginationType);
-          add(c.pagination && c.dynamicBullets, "dynamic-bullets", c.dynamicMainBullets);
+          add(c.pagination && c.paginationPosition !== DEFAULTS.paginationPosition, "pagination-position", c.paginationPosition);
+          add(c.pagination && c.dynamicBullets && c.paginationType.includes("bullets"), "dynamic-bullets", c.dynamicMainBullets);
 
           add(!!c.effect, "effect", c.effect);
           add(c.effect === "coverflow" && c.coverflowRotate !== DEFAULTS.coverflowRotate, "coverflow-rotate", c.coverflowRotate);
@@ -1172,10 +1195,10 @@
           add(!c.clickthrough, "clickthrough", "false");
           add(c.newWindow, "new-window", "true");
 
-          // Meta elements: toggles + positions
-          add(!c.categories, "categories", "false");
+          // Meta elements: toggles + positions (categories/tags now default OFF)
+          add(c.categories, "categories", "true");
           add(c.categories && c.categoriesPosition !== DEFAULTS.categoriesPosition, "categories-position", c.categoriesPosition);
-          add(!c.tags, "tags", "false");
+          add(c.tags, "tags", "true");
           add(c.tags && c.tagsPosition !== DEFAULTS.tagsPosition, "tags-position", c.tagsPosition);
           add(!c.eventDates, "event-dates", "false");
           add(c.eventDates && c.eventDatesPosition !== DEFAULTS.eventDatesPosition, "event-dates-position", c.eventDatesPosition);
@@ -1191,7 +1214,6 @@
           add(c.metadataTagLinks, "metadata-tag-links", "true");
 
           add(c.cacheDuration > 0, "cache-duration", c.cacheDuration);
-          add(c.sdlPopups, "sdl-popups", "true");
 
           // scoped style block for changed CSS variables
           const vars = [];
@@ -1247,8 +1269,8 @@ ${styleBlock}<div id="${c.elId}"
         function syncRows() {
           document.getElementById("eventsRow").style.display = val("collectionType") === "event" ? "block" : "none";
           document.getElementById("navLayoutRow").style.display = chk("navigation") ? "block" : "none";
-          document.getElementById("dynBulletsRow").style.display = (chk("pagination") && val("paginationType") === "bullets") ? "flex" : "none";
-          document.getElementById("dynMainRow").style.display = (chk("pagination") && val("paginationType") === "bullets" && chk("dynamicBullets")) ? "block" : "none";
+          document.getElementById("dynBulletsRow").style.display = (chk("pagination") && val("paginationType").includes("bullets")) ? "flex" : "none";
+          document.getElementById("dynMainRow").style.display = (chk("pagination") && val("paginationType").includes("bullets") && chk("dynamicBullets")) ? "block" : "none";
           document.getElementById("coverflowOpts").style.display = val("effect") === "coverflow" ? "block" : "none";
 
           // meta element details + pill style blocks
